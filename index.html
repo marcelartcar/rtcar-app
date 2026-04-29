@@ -650,9 +650,10 @@ function bS2(f){
     html+='<div class="fl"><label>Ano Fabricação</label><input value="'+v.yf+'" data-field="yf" data-idx="'+i+'" oninput="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value" class="notransform" style="text-transform:none"></div>';
     html+='<div class="fl"><label>Ano Modelo</label><input value="'+v.ym+'" data-field="ym" data-idx="'+i+'" oninput="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value" class="notransform" style="text-transform:none"></div>';
     html+='<div class="fl"><label>Placa</label><input value="'+v.pl+'" data-field="pl" data-idx="'+i+'" oninput="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value.toUpperCase()"></div>';
-    html+='<div class="fl"><label>Veículo possui alienação no banco:</label><input value="'+v.fi+'" data-field="fi" data-idx="'+i+'" oninput="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value.toUpperCase()"></div>';
-    html+=mFld('Avaliação','nf.tv.'+i+'.av',v.av,false);
+    html+='<div class="fl"><label>Veículo possui alienação no banco:</label><input value="'+v.fi+'" data-field="fi" data-idx="'+i+'" oninput="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value.toUpperCase()" placeholder="EX: ITAÚ, BRADESCO..."></div>';
     html+=mFld('Valor de Quitação Atual','nf.tv.'+i+'.bk',v.bk,false);
+    html+=mFld('Avaliação','nf.tv.'+i+'.av',v.av,false);
+    html+=mFld('Valor Fipe','nf.tv.'+i+'.po',v.po,false);
         html+='<div class="fl"><label>Chave Reserva <span class="req">*</span></label><div class="rg"><label class="ro"><input type="radio" name="cr'+i+'" data-field="cr" data-idx="'+i+'" '+(v.cr==='sim'?'checked':'')+' onchange="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value" value="sim">✅ Sim</label><label class="ro"><input type="radio" name="cr'+i+'" data-field="cr" data-idx="'+i+'" '+(v.cr==='nao'?'checked':'')+' onchange="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value" value="nao">❌ Não</label></div></div>';
     html+='<div class="fl"><label>IPVA 2026</label><div class="rg"><label class="ro"><input type="radio" name="tvi'+i+'" data-field="ip" data-idx="'+i+'" '+(v.ip==='comprador'?'checked':'')+' onchange="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value" value="comprador">Comprador</label><label class="ro"><input type="radio" name="tvi'+i+'" data-field="ip" data-idx="'+i+'" '+(v.ip==='rtcar'?'checked':'')+' onchange="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value" value="rtcar">RT Car</label></div></div>';
     html+='<div class="fl full"><label>Observações do veículo</label><textarea data-field="obs" data-idx="'+i+'" oninput="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value.toUpperCase()" placeholder="AMASSADOS, RISCOS, MECÂNICA...">'+(v.obs||'')+'</textarea></div>';
@@ -665,7 +666,8 @@ function bS2(f){
 function bS3(f){
   var p=f.py;
   var html='<div style="font-family:var(--s);font-size:19px;margin-bottom:16px">Formas de Pagamento</div>';
-  html+='<div class="fl" style="margin-bottom:14px"><label>Formas utilizadas</label><div class="rg">';
+  html+=mFld('Valor da Volta / Pagamento (opcional)','nf.py.vo',p.vo,false);
+  html+='<div class="fl" style="margin-bottom:14px;margin-top:14px"><label>Formas utilizadas</label><div class="rg">';
   for(var i=0;i<FORMAS.length;i++){
     var fp=FORMAS[i], checked=(p.formas||[]).indexOf(fp)>-1;
     html+='<label class="ro" style="background:'+(checked?'var(--redl)':'var(--bg3)')+';border:1px solid '+(checked?'var(--red)':'var(--bdr)')+';border-radius:7px;padding:6px 11px;font-size:12px;font-weight:500;cursor:pointer"><input type="checkbox" data-forma="'+fp+'" '+(checked?'checked':'')+' onchange="toggleForma(this.dataset.forma)" style="accent-color:var(--red)"> '+fp+'</label>';
@@ -675,7 +677,6 @@ function bS3(f){
   html+='<textarea oninput="if(G.nf)G.nf.py.obs=this.value.toUpperCase()" placeholder="EX: ENTRADA R$ 30.000 DINHEIRO + FINANCIAMENTO BRADESCO 48X..." style="min-height:80px">'+p.obs+'</textarea></div>';
   html+='<div class="fl" style="margin-bottom:14px;margin-top:12px"><label>Observações adicionais</label>';
   html+='<textarea oninput="if(G.nf)G.nf.py.obs2=this.value.toUpperCase()" placeholder="EX: CHAVE RESERVA ENTREGUE, REVISÃO AGENDADA..." style="min-height:64px">'+(p.obs2||'')+'</textarea></div>';
-  html+=mFld('Valor da Volta / Pagamento (opcional)','nf.py.vo',p.vo,false);
   html+='<label style="display:flex;align-items:center;gap:9px;padding:10px 13px;background:var(--bg3);border-radius:var(--r);cursor:pointer;font-size:13px;font-weight:500;margin:14px 0"><input type="checkbox" '+(p.hf?'checked':'')+' onchange="if(G.nf)G.nf.py.hf=this.checked;re()" style="accent-color:var(--red);width:15px;height:15px"> Detalhar financiamento</label>';
   if(p.hf){
     html+='<div class="g2">';
@@ -832,17 +833,18 @@ function bPDFv(){
     html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Placa</div><div style="font-size:13px;font-weight:500">'+v.pl+'</div></div>';
     html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Chave Reserva</div><div style="font-size:13px;font-weight:500">'+(v.cr==='sim'?'Sim':'Não')+'</div></div>';
     html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Avaliação</div><div style="font-size:13px;font-weight:500">'+fmtR(v.av)+'</div></div>';
-    html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Fipe</div><div style="font-size:13px;font-weight:500">'+fmtR(v.fi)+'</div></div>';
+    html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Fipe</div><div style="font-size:13px;font-weight:500">'+fmtR(v.po)+'</div></div>';
     html+='</div>';
+    if(v.fi||v.bk) html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin-bottom:4px"><div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Banco Alienação</div><div style="font-size:13px;font-weight:500">'+(v.fi||'—')+'</div></div><div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Valor Quitação</div><div style="font-size:13px;font-weight:500">'+fmtR(v.bk)+'</div></div></div>';
     if(v.obs) html+='<div style="margin-top:6px;font-size:11px;color:var(--tx2);font-style:italic">📝 '+v.obs+'</div>';
-    if(v.bk) html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin-bottom:4px"><div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Banco Alienação</div><div style="font-size:13px;font-weight:500">'+v.bk+'</div></div><div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Valor Quitação</div><div style="font-size:13px;font-weight:500">'+fmtR(v.po)+'</div></div></div>';
     html+='<div style="margin-top:6px;font-size:11px">IPVA 2026: <strong>('+(v.ip==='comprador'?'X':' ')+') Comprador &nbsp; ('+(v.ip==='rtcar'?'X':' ')+') RT Car</strong></div></div>';
   }
   // Pagamento
   html+='<div style="margin-bottom:14px"><div style="background:#e0e0e0;color:#444;padding:4px 10px;border-radius:4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:inline-block">Formas de Pagamento</div>';
+  if(t.py.vo) html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px;padding:6px 10px;background:var(--bg3);border-radius:5px"><span style="font-size:12px;color:var(--tx2)">Valor da Volta / Pagamento:</span><span style="font-size:13px;font-weight:700;color:#e8431e">'+fmtR(t.py.vo)+'</span></div>';
   if(t.py.formas&&t.py.formas.length>0){ html+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">'; for(var i=0;i<t.py.formas.length;i++) html+='<span style="background:var(--bg3);border:1px solid var(--bdr);border-radius:4px;padding:2px 8px;font-size:11px">'+t.py.formas[i]+'</span>'; html+='</div>'; }
-  if(t.py.obs) html+='<div style="font-size:13px;margin-bottom:8px;color:var(--tx2)">📝 '+t.py.obs+'</div>';
-  if(t.py.vo) html+='<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px">Valor da Volta / Pagamento:</span><span style="font-size:13px;font-weight:700;color:#e8431e">'+fmtR(t.py.vo)+'</span></div>';
+  if(t.py.obs) html+='<div style="font-size:12px;margin-bottom:6px;color:var(--tx2);padding:6px 10px;background:var(--bg3);border-radius:5px">'+t.py.obs+'</div>';
+  if(t.py.obs2) html+='<div style="font-size:12px;margin-bottom:6px;color:var(--tx2);font-style:italic">'+t.py.obs2+'</div>';
   if(t.py.hf) html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 14px"><div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Banco</div><div style="font-size:13px;font-weight:500">'+t.py.fb+'</div></div><div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Valor Financiado</div><div style="font-size:13px;font-weight:500">'+fmtR(t.py.fv)+'</div></div><div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Parcelas</div><div style="font-size:13px;font-weight:500">'+t.py.fp+'x de '+fmtR(t.py.fpv)+'</div></div><div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Taxa</div><div style="font-size:13px;font-weight:500">'+t.py.ft+'</div></div><div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">1ª Parcela</div><div style="font-size:13px;font-weight:500">'+t.py.fvc+'</div></div></div>';
   html+='</div>';
   if(t.st==='approved') html+='<div style="background:var(--greenl);border:1px solid rgba(26,107,60,.2);border-radius:6px;padding:8px 14px;font-size:11px;color:var(--green);font-weight:600;margin-bottom:10px">✓ Aprovado por Rafael Gonçalves em '+(t.at||'—')+'</div>';
@@ -893,8 +895,8 @@ function gerarPDF(id){
     secao('VEÍCULO DE TROCA'+(t.tv.length>1?' '+(i+1):''),'#1e4d8c');
     y=lc([{l:'Modelo / Marca',v:v.m,x:M,w:tw*.40},{l:'Ano Fab./Mod.',v:v.yf+'/'+v.ym,x:M+tw*.42,w:tw*.16},{l:'Cor',v:v.c,x:M+tw*.60,w:tw*.16},{l:'Valor Estimado',v:fmtR(v.v),x:M+tw*.78,w:tw*.22,dir:true}],y);
     y=lc([{l:'Quilometragem',v:v.km,x:M,w:tw*.28},{l:'Placa',v:v.pl,x:M+tw*.30,w:tw*.22},{l:'Chave Reserva',v:v.cr==='sim'?'Sim':'Não',x:M+tw*.54,w:tw*.46}],y);
-    y=lc([{l:'Avaliação',v:fmtR(v.av),x:M,w:tw*.35},{l:'Valor Fipe',v:fmtR(v.fi),x:M+tw*.37,w:tw*.63}],y);
-    if(v.bk) y=lc([{l:'Banco Alienação',v:v.bk||'—',x:M,w:tw*.45},{l:'Valor Quitação',v:fmtR(v.po),x:M+tw*.47,w:tw*.53}],y);
+    y=lc([{l:'Avaliação',v:fmtR(v.av),x:M,w:tw*.35},{l:'Valor Fipe',v:fmtR(v.po),x:M+tw*.37,w:tw*.63}],y);
+    if(v.fi||v.bk) y=lc([{l:'Banco Alienação',v:v.fi||'—',x:M,w:tw*.45},{l:'Valor Quitação',v:fmtR(v.bk),x:M+tw*.47,w:tw*.53}],y);
     if(v.obs) y=lc([{l:'Observações',v:v.obs,x:M,w:tw}],y);
     sf('normal',9,'#1a1814');doc.text('IPVA 2026: ('+(v.ip==='comprador'?'X':' ')+') Comprador   ('+(v.ip==='rtcar'?'X':' ')+') RT Car',M,y);y+=8;
   }
