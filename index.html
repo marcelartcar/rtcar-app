@@ -575,10 +575,10 @@ function nS(){
     if(!f.ph.trim()) return alert('Informe o telefone.');
   }
   if(s===1){
-    // Sincroniza campos monetários que podem não ter disparado oninput (paste, autofill)
+    // Sincroniza campos monetários antes de validar (cobre paste, autofill, etc.)
     document.querySelectorAll('.mwrap input').forEach(function(el){
-      var m = (el.getAttribute('oninput')||'').match(/onMoney\(this,'([^']+)'\)/);
-      if(m) onMoney(el, m[1]);
+      var m=(el.getAttribute('oninput')||'').match(/onMoney\(this,'([^']+)'\)/);
+      if(m) onMoney(el,m[1]);
     });
     for(var i=0;i<f.sv.length;i++){
       var v=f.sv[i];
