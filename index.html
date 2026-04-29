@@ -781,36 +781,42 @@ function bPDFv(){
   for(var i=0;i<t.sv.length;i++){
     var v=t.sv[i];
     html+='<div style="margin-bottom:14px"><div style="background:#e0e0e0;color:#444;padding:4px 10px;border-radius:4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:inline-block">Veículo Vendido'+(t.sv.length>1?' '+(i+1):'')+'</div>';
-    html+='<div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 14px;flex:1">';
-    html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:8px;text-transform:uppercase;color:var(--tx3)">Modelo</div><div style="font-size:11px;font-weight:500">'+v.m+'</div></div>';
-    html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:8px;text-transform:uppercase;color:var(--tx3)">Ano</div><div style="font-size:11px;font-weight:500">'+v.yf+'/'+v.ym+'</div></div>';
-    html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:8px;text-transform:uppercase;color:var(--tx3)">Cor</div><div style="font-size:11px;font-weight:500">'+v.c+'</div></div>';
-    html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:8px;text-transform:uppercase;color:var(--tx3)">Km</div><div style="font-size:11px;font-weight:500">'+v.km+'</div></div>';
-    html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:8px;text-transform:uppercase;color:var(--tx3)">Placa</div><div style="font-size:11px;font-weight:500">'+v.pl+'</div></div>';
-    html+='</div><div style="text-align:right;min-width:110px;margin-left:16px"><div style="font-size:8px;text-transform:uppercase;color:var(--tx3)">Valor de Venda</div><div style="font-size:15px;font-weight:700;color:#e8431e">'+fmtR(v.pr)+'</div></div></div>';
-    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;font-size:11px"><span>IPVA 2026: <strong>('+( v.ip==='comprador'?'X':' ')+') Comprador &nbsp; ('+(v.ip==='rtcar'?'X':' ')+') RT Car</strong></span><span>Transferência: <strong>('+(v.tr==='comprador'?'X':' ')+') Comprador &nbsp; ('+(v.tr==='rtcar'?'X':' ')+') RT Car</strong></span></div></div>';
+    html+='<div style="display:grid;grid-template-columns:2fr 1fr 1fr 1.5fr;gap:8px 14px;margin-bottom:8px">';
+    html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Modelo</div><div style="font-size:13px;font-weight:600">'+v.m+'</div></div>';
+    html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Ano</div><div style="font-size:13px;font-weight:500">'+v.yf+'/'+v.ym+'</div></div>';
+    html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Cor</div><div style="font-size:13px;font-weight:500">'+v.c+'</div></div>';
+    html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:5px;text-align:right"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Valor de Venda</div><div style="font-size:18px;font-weight:700;color:#e8431e">'+fmtR(v.pr)+'</div></div>';
+    html+='</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin-bottom:4px">';
+    html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Km</div><div style="font-size:13px;font-weight:500">'+v.km+'</div></div>';
+    html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Placa</div><div style="font-size:13px;font-weight:500">'+v.pl+'</div></div>';
+    html+='</div>';
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;font-size:12px"><span>IPVA 2026: <strong>('+( v.ip==='comprador'?'X':' ')+') Comprador &nbsp; ('+(v.ip==='rtcar'?'X':' ')+') RT Car</strong></span><span>Transferência: <strong>('+(v.tr==='comprador'?'X':' ')+') Comprador &nbsp; ('+(v.tr==='rtcar'?'X':' ')+') RT Car</strong></span></div></div>';
   }
   // Veículos de troca
   for(var i=0;i<t.tv.length;i++){
     var v=t.tv[i];
     html+='<div style="margin-bottom:14px"><div style="background:#e0e0e0;color:#444;padding:4px 10px;border-radius:4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:inline-block">Veículo de Troca'+(t.tv.length>1?' '+(i+1):'')+'</div>';
-    html+='<div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 14px;flex:1">';
-    html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:8px;text-transform:uppercase;color:var(--tx3)">Modelo</div><div style="font-size:11px;font-weight:500">'+v.m+'</div></div>';
-    html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:8px;text-transform:uppercase;color:var(--tx3)">Ano</div><div style="font-size:11px;font-weight:500">'+v.yf+'/'+v.ym+'</div></div>';
-    html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:8px;text-transform:uppercase;color:var(--tx3)">Km</div><div style="font-size:11px;font-weight:500">'+v.km+'</div></div>';
-    html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:8px;text-transform:uppercase;color:var(--tx3)">Placa</div><div style="font-size:11px;font-weight:500">'+v.pl+'</div></div>';
-    html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:8px;text-transform:uppercase;color:var(--tx3)">Chave Reserva</div><div style="font-size:11px;font-weight:500">'+(v.cr==='sim'?'Sim':'Não')+'</div></div>';
-    html+='</div><div style="text-align:right;min-width:110px;margin-left:16px"><div style="font-size:8px;text-transform:uppercase;color:var(--tx3)">Valor Entrada</div><div style="font-size:15px;font-weight:700;color:#e8431e">'+fmtR(v.v)+'</div><div style="margin-top:5px"><div style="font-size:8px;text-transform:uppercase;color:var(--tx3)">Fipe</div><div style="font-size:12px;font-weight:500">'+fmtR(v.fi)+'</div></div><div style="margin-top:5px"><div style="font-size:8px;text-transform:uppercase;color:var(--tx3)">Avaliação</div><div style="font-size:12px;font-weight:500">'+fmtR(v.av)+'</div></div></div></div>';
+    html+='<div style="display:grid;grid-template-columns:2fr 1fr 1fr 1.5fr;gap:8px 14px;margin-bottom:8px">';
+    html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Modelo</div><div style="font-size:13px;font-weight:600">'+v.m+'</div></div>';
+    html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Ano</div><div style="font-size:13px;font-weight:500">'+v.yf+'/'+v.ym+'</div></div>';
+    html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Km</div><div style="font-size:13px;font-weight:500">'+v.km+'</div></div>';
+    html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:5px;text-align:right"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Valor Estimado</div><div style="font-size:18px;font-weight:700;color:#e8431e">'+fmtR(v.v)+'</div></div>';
+    html+='</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px 14px;margin-bottom:4px">';
+    html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Placa</div><div style="font-size:13px;font-weight:500">'+v.pl+'</div></div>';
+    html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Chave Reserva</div><div style="font-size:13px;font-weight:500">'+(v.cr==='sim'?'Sim':'Não')+'</div></div>';
+    html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Avaliação</div><div style="font-size:13px;font-weight:500">'+fmtR(v.av)+'</div></div>';
+    html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Fipe</div><div style="font-size:13px;font-weight:500">'+fmtR(v.fi)+'</div></div>';
+    html+='</div>';
     if(v.obs) html+='<div style="margin-top:6px;font-size:11px;color:var(--tx2);font-style:italic">📝 '+v.obs+'</div>';
-    if(v.bk) html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px"><div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:8px;text-transform:uppercase;color:var(--tx3)">Banco</div><div style="font-size:11px;font-weight:500">'+v.bk+'</div></div><div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:8px;text-transform:uppercase;color:var(--tx3)">Quitação</div><div style="font-size:11px;font-weight:500">'+fmtR(v.po)+'</div></div></div>';
+    if(v.bk) html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin-bottom:4px"><div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Banco Alienação</div><div style="font-size:13px;font-weight:500">'+v.bk+'</div></div><div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Valor Quitação</div><div style="font-size:13px;font-weight:500">'+fmtR(v.po)+'</div></div></div>';
     html+='<div style="margin-top:6px;font-size:11px">IPVA 2026: <strong>('+(v.ip==='comprador'?'X':' ')+') Comprador &nbsp; ('+(v.ip==='rtcar'?'X':' ')+') RT Car</strong></div></div>';
   }
   // Pagamento
   html+='<div style="margin-bottom:14px"><div style="background:#e0e0e0;color:#444;padding:4px 10px;border-radius:4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:inline-block">Formas de Pagamento</div>';
   if(t.py.formas&&t.py.formas.length>0){ html+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">'; for(var i=0;i<t.py.formas.length;i++) html+='<span style="background:var(--bg3);border:1px solid var(--bdr);border-radius:4px;padding:2px 8px;font-size:11px">'+t.py.formas[i]+'</span>'; html+='</div>'; }
-  if(t.py.obs) html+='<div style="font-size:11px;margin-bottom:8px;color:var(--tx2)">📝 '+t.py.obs+'</div>';
-  if(t.py.vo) html+='<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:11px">Valor da Volta / Pagamento:</span><span style="font-size:13px;font-weight:700;color:#e8431e">'+fmtR(t.py.vo)+'</span></div>';
-  if(t.py.hf) html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 14px"><div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:8px;text-transform:uppercase;color:var(--tx3)">Banco</div><div style="font-size:11px;font-weight:500">'+t.py.fb+'</div></div><div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:8px;text-transform:uppercase;color:var(--tx3)">Valor Financiado</div><div style="font-size:11px;font-weight:500">'+fmtR(t.py.fv)+'</div></div><div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:8px;text-transform:uppercase;color:var(--tx3)">Parcelas</div><div style="font-size:11px;font-weight:500">'+t.py.fp+'x de '+fmtR(t.py.fpv)+'</div></div><div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:8px;text-transform:uppercase;color:var(--tx3)">Taxa</div><div style="font-size:11px;font-weight:500">'+t.py.ft+'</div></div><div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:8px;text-transform:uppercase;color:var(--tx3)">1ª Parcela</div><div style="font-size:11px;font-weight:500">'+t.py.fvc+'</div></div></div>';
+  if(t.py.obs) html+='<div style="font-size:13px;margin-bottom:8px;color:var(--tx2)">📝 '+t.py.obs+'</div>';
+  if(t.py.vo) html+='<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px">Valor da Volta / Pagamento:</span><span style="font-size:13px;font-weight:700;color:#e8431e">'+fmtR(t.py.vo)+'</span></div>';
+  if(t.py.hf) html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 14px"><div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Banco</div><div style="font-size:13px;font-weight:500">'+t.py.fb+'</div></div><div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Valor Financiado</div><div style="font-size:13px;font-weight:500">'+fmtR(t.py.fv)+'</div></div><div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Parcelas</div><div style="font-size:13px;font-weight:500">'+t.py.fp+'x de '+fmtR(t.py.fpv)+'</div></div><div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Taxa</div><div style="font-size:13px;font-weight:500">'+t.py.ft+'</div></div><div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">1ª Parcela</div><div style="font-size:13px;font-weight:500">'+t.py.fvc+'</div></div></div>';
   html+='</div>';
   if(t.st==='approved') html+='<div style="background:var(--greenl);border:1px solid rgba(26,107,60,.2);border-radius:6px;padding:8px 14px;font-size:11px;color:var(--green);font-weight:600;margin-bottom:10px">✓ Aprovado por Rafael Gonçalves em '+(t.at||'—')+'</div>';
   // Assinaturas
@@ -834,15 +840,15 @@ function gerarPDF(id){
   function sf(st,sz,col){doc.setFont('helvetica',st);doc.setFontSize(sz);var c=h2r(col||'#1a1814');doc.setTextColor(c[0],c[1],c[2]);}
   function fr(x,fy,w,h,col){var c=h2r(col);doc.setFillColor(c[0],c[1],c[2]);doc.rect(x,fy,w,h,'F');}
   function dl(x1,y1,x2,y2,col,lw){var c=h2r(col||'#e0e0e0');doc.setDrawColor(c[0],c[1],c[2]);doc.setLineWidth(lw||0.2);doc.line(x1,y1,x2,y2);}
-  function campo(label,valor,x,fy,w){sf('bold',7,'#888888');doc.text(label,x,fy);sf('normal',9,'#1a1814');doc.text(String(valor||'—'),x,fy+4.5,{maxWidth:w-1});dl(x,fy+6.2,x+w,fy+6.2,'#e0e0e0',0.15);}
-  function campoDir(label,valor,x,fy,w){sf('bold',7,'#888888');doc.text(label,x+w,fy,{align:'right'});sf('bold',10,'#e8431e');doc.text(String(valor||'—'),x+w,fy+5,{align:'right'});dl(x,fy+6.5,x+w,fy+6.5,'#e0e0e0',0.15);}
-  function lc(campos,fy){for(var i=0;i<campos.length;i++){var c=campos[i];if(c.dir) campoDir(c.l,c.v,c.x,fy,c.w);else campo(c.l,c.v,c.x,fy,c.w);}return fy+10;}
-  function secao(titulo,cor){fr(M,y,W-M*2,7,'#e8e8e8');sf('bold',8,'#444444');doc.text(titulo,M+3,y+5);y+=10;}
+  function campo(label,valor,x,fy,w){sf('bold',8,'#888888');doc.text(label,x,fy);sf('normal',10,'#1a1814');doc.text(String(valor||'—'),x,fy+4.5,{maxWidth:w-1});dl(x,fy+6.2,x+w,fy+6.2,'#e0e0e0',0.15);}
+  function campoDir(label,valor,x,fy,w){sf('bold',8,'#888888');doc.text(label,x+w,fy,{align:'right'});sf('bold',12,'#e8431e');doc.text(String(valor||'—'),x+w,fy+5,{align:'right'});dl(x,fy+6.5,x+w,fy+6.5,'#e0e0e0',0.15);}
+  function lc(campos,fy){for(var i=0;i<campos.length;i++){var c=campos[i];if(c.dir) campoDir(c.l,c.v,c.x,fy,c.w);else campo(c.l,c.v,c.x,fy,c.w);}return fy+12;}
+  function secao(titulo,cor){fr(M,y,W-M*2,7,'#e8e8e8');sf('bold',9,'#444444');doc.text(titulo,M+3,y+5);y+=10;}
   // Header
   fr(0,0,W,28,'#e0e0e0');
   try{doc.addImage(LOGO,'PNG',M,3,0,22);}catch(e){}
-  sf('bold',14,'#333333');doc.text('TERMO DE VENDA',W/2,12,{align:'center'});
-  sf('normal',8,'#666666');doc.text('Nº '+t.id,W-M,8,{align:'right'});doc.text('Data: '+t.dt,W-M,13,{align:'right'});doc.text('Origem: '+t.og,W-M,18,{align:'right'});
+  sf('bold',20,'#333333');doc.text('TERMO DE VENDA',W/2,12,{align:'center'});
+  sf('normal',9,'#666666');doc.text('Nº '+t.id,W-M,8,{align:'right'});doc.text('Data: '+t.dt,W-M,13,{align:'right'});doc.text('Origem: '+t.og,W-M,18,{align:'right'});
   y=34;
   var tw=W-M*2;
   secao('DADOS DO COMPRADOR','#1e4d8c');
@@ -850,23 +856,23 @@ function gerarPDF(id){
   for(var i=0;i<t.sv.length;i++){
     var v=t.sv[i];
     secao('VEÍCULO VENDIDO'+(t.sv.length>1?' '+(i+1):''));
-    y=lc([{l:'Modelo / Marca',v:v.m,x:M,w:tw*.44},{l:'Ano Fab./Mod.',v:v.yf+'/'+v.ym,x:M+tw*.46,w:tw*.2},{l:'Cor',v:v.c,x:M+tw*.68,w:tw*.32}],y);
-    y=lc([{l:'Quilometragem',v:v.km,x:M,w:tw*.3},{l:'Placa',v:v.pl,x:M+tw*.32,w:tw*.28},{l:'Valor de Venda',v:fmtR(v.pr),x:M+tw*.62,w:tw*.38,dir:true}],y);
-    sf('normal',8,'#1a1814');doc.text('IPVA 2026: ('+(v.ip==='comprador'?'X':' ')+') Comprador   ('+(v.ip==='rtcar'?'X':' ')+') RT Car',M,y);
+    y=lc([{l:'Modelo / Marca',v:v.m,x:M,w:tw*.40},{l:'Ano Fab./Mod.',v:v.yf+'/'+v.ym,x:M+tw*.42,w:tw*.16},{l:'Cor',v:v.c,x:M+tw*.60,w:tw*.16},{l:'Valor de Venda',v:fmtR(v.pr),x:M+tw*.78,w:tw*.22,dir:true}],y);
+    y=lc([{l:'Quilometragem',v:v.km,x:M,w:tw*.35},{l:'Placa',v:v.pl,x:M+tw*.37,w:tw*.63}],y);
+    sf('normal',9,'#1a1814');doc.text('IPVA 2026: ('+(v.ip==='comprador'?'X':' ')+') Comprador   ('+(v.ip==='rtcar'?'X':' ')+') RT Car',M,y);
     doc.text('Transferência: ('+(v.tr==='comprador'?'X':' ')+') Comprador   ('+(v.tr==='rtcar'?'X':' ')+') RT Car',M+90,y);y+=8;
   }
   for(var i=0;i<t.tv.length;i++){
     var v=t.tv[i];
     secao('VEÍCULO DE TROCA'+(t.tv.length>1?' '+(i+1):''),'#1e4d8c');
-    y=lc([{l:'Modelo / Marca',v:v.m,x:M,w:tw*.44},{l:'Ano Fab./Mod.',v:v.yf+'/'+v.ym,x:M+tw*.46,w:tw*.2},{l:'Cor',v:v.c,x:M+tw*.68,w:tw*.32}],y);
-    y=lc([{l:'Quilometragem',v:v.km,x:M,w:tw*.25},{l:'Placa',v:v.pl,x:M+tw*.27,w:tw*.22},{l:'Chave Reserva',v:v.cr==='sim'?'Sim':'Não',x:M+tw*.51,w:tw*.2},{l:'Valor de Entrada',v:fmtR(v.v),x:M+tw*.73,w:tw*.27,dir:true}],y);
-    y=lc([{l:'Valor Fipe',v:fmtR(v.fi),x:M,w:tw*.3},{l:'Valor Avaliação',v:fmtR(v.av),x:M+tw*.32,w:tw*.3},{l:'Banco (Alienação)',v:v.bk||'—',x:M+tw*.64,w:tw*.36}],y);
-    if(v.po) y=lc([{l:'Valor Quitação',v:fmtR(v.po),x:M,w:tw*.3}],y);
+    y=lc([{l:'Modelo / Marca',v:v.m,x:M,w:tw*.40},{l:'Ano Fab./Mod.',v:v.yf+'/'+v.ym,x:M+tw*.42,w:tw*.16},{l:'Cor',v:v.c,x:M+tw*.60,w:tw*.16},{l:'Valor Estimado',v:fmtR(v.v),x:M+tw*.78,w:tw*.22,dir:true}],y);
+    y=lc([{l:'Quilometragem',v:v.km,x:M,w:tw*.28},{l:'Placa',v:v.pl,x:M+tw*.30,w:tw*.22},{l:'Chave Reserva',v:v.cr==='sim'?'Sim':'Não',x:M+tw*.54,w:tw*.46}],y);
+    y=lc([{l:'Avaliação',v:fmtR(v.av),x:M,w:tw*.35},{l:'Valor Fipe',v:fmtR(v.fi),x:M+tw*.37,w:tw*.63}],y);
+    if(v.bk) y=lc([{l:'Banco Alienação',v:v.bk||'—',x:M,w:tw*.45},{l:'Valor Quitação',v:fmtR(v.po),x:M+tw*.47,w:tw*.53}],y);
     if(v.obs) y=lc([{l:'Observações',v:v.obs,x:M,w:tw}],y);
-    sf('normal',8,'#1a1814');doc.text('IPVA 2026: ('+(v.ip==='comprador'?'X':' ')+') Comprador   ('+(v.ip==='rtcar'?'X':' ')+') RT Car',M,y);y+=8;
+    sf('normal',9,'#1a1814');doc.text('IPVA 2026: ('+(v.ip==='comprador'?'X':' ')+') Comprador   ('+(v.ip==='rtcar'?'X':' ')+') RT Car',M,y);y+=8;
   }
   secao('FORMAS DE PAGAMENTO','#1a6b3c');
-  if(t.py.formas&&t.py.formas.length>0){sf('normal',8,'#1a1814');doc.text('Formas: '+t.py.formas.join(', '),M,y);y+=7;}
+  if(t.py.formas&&t.py.formas.length>0){sf('normal',9,'#1a1814');doc.text('Formas: '+t.py.formas.join(', '),M,y);y+=7;}
   if(t.py.obs) y=lc([{l:'Negociação / Detalhes',v:t.py.obs,x:M,w:tw}],y);
   if(t.py.vo) y=lc([{l:'Valor da Volta / Pagamento',v:fmtR(t.py.vo),x:M+tw*.62,w:tw*.38,dir:true}],y);
   if(t.py.hf){
