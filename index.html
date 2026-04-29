@@ -453,7 +453,7 @@ function bNV(){
   if(!G.nf) iNF();
   if(G.nf.dn){
     var did=G.nf.did||G.nf.editId;
-    return '<div class="card" style="text-align:center;padding:44px 24px"><div style="font-size:48px;margin-bottom:14px">✅</div><h2 style="font-family:var(--s);font-size:22px;margin-bottom:8px">Termo '+(G.nf.editMode?'atualizado':'enviado')+'!</h2><p style="color:var(--tx2);margin-bottom:4px">ID: <strong>'+did+'</strong></p><p style="color:var(--tx3);font-size:12px;margin-bottom:24px">'+(G.nf.editMode?'Termo atualizado com sucesso.':'Rafael Gonçalves foi notificado para aprovar.')+'</p><div style="display:flex;gap:9px;justify-content:center"><button class="btn bp" onclick="G.pid=\'+did+\';re()">👁 Visualizar</button><button class="btn bp" onclick="gerarPDF(\'+did+\')">⬇ Salvar PDF</button><button class="btn bs" onclick="if(G.nf)G.nf=null;go(\'tl\')">Ver Todos</button></div></div>';
+    return '<div class="card" style="text-align:center;padding:44px 24px"><div style="font-size:48px;margin-bottom:14px">✅</div><h2 style="font-family:var(--s);font-size:22px;margin-bottom:8px">Termo '+(G.nf.editMode?'atualizado':'enviado')+'!</h2><p style="color:var(--tx2);margin-bottom:4px">ID: <strong>'+did+'</strong></p><p style="color:var(--tx3);font-size:12px;margin-bottom:24px">'+(G.nf.editMode?'Termo atualizado com sucesso.':'Rafael Gonçalves foi notificado para aprovar.')+'</p><div style="display:flex;gap:9px;justify-content:center"><button class="btn bp" data-did="'+did+'" onclick="G.pid=this.dataset.did;re()">👁 Visualizar</button><button class="btn bp" data-did="'+did+'" onclick="gerarPDF(this.dataset.did)">⬇ Salvar PDF</button><button class="btn bs" onclick="if(G.nf)G.nf=null;go(\'tl\')">Ver Todos</button></div></div>';
   }
   var STEPS=['Informações','Veículos Vendidos','Veículos de Troca','Pagamento'];
   var s=G.ns, f=G.nf;
@@ -530,11 +530,10 @@ function bS2(f){
     html+='<div class="fl"><label>Ano Fabricação</label><input value="'+v.yf+'" data-field="yf" data-idx="'+i+'" oninput="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value" class="notransform" style="text-transform:none"></div>';
     html+='<div class="fl"><label>Ano Modelo</label><input value="'+v.ym+'" data-field="ym" data-idx="'+i+'" oninput="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value" class="notransform" style="text-transform:none"></div>';
     html+='<div class="fl"><label>Placa</label><input value="'+v.pl+'" data-field="pl" data-idx="'+i+'" oninput="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value.toUpperCase()"></div>';
-    html+='<div class="fl"><label>Financiamento / Alienação</label><input value="'+v.fi+'" data-field="fi" data-idx="'+i+'" oninput="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value.toUpperCase()"></div>';
-    html+='<div class="fl"><label>Avaliação</label><input value="'+v.av+'" data-field="av" data-idx="'+i+'" oninput="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value.toUpperCase()"></div>';
-    html+='<div class="fl"><label>Banco (Alienação)</label><input value="'+v.bk+'" data-field="bk" data-idx="'+i+'" oninput="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value.toUpperCase()"></div>';
-    html+='<div class="fl"><label>Procedência</label><input value="'+v.po+'" data-field="po" data-idx="'+i+'" oninput="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value.toUpperCase()"></div>';
-    html+='<div class="fl"><label>Chave Reserva <span class="req">*</span></label><div class="rg"><label class="ro"><input type="radio" name="cr'+i+'" data-field="cr" data-idx="'+i+'" '+(v.cr==='sim'?'checked':'')+' onchange="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value" value="sim">✅ Sim</label><label class="ro"><input type="radio" name="cr'+i+'" data-field="cr" data-idx="'+i+'" '+(v.cr==='nao'?'checked':'')+' onchange="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value" value="nao">❌ Não</label></div></div>';
+    html+='<div class="fl"><label>Veículo possui alienação no banco:</label><input value="'+v.fi+'" data-field="fi" data-idx="'+i+'" oninput="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value.toUpperCase()"></div>';
+    html+=mFld('Avaliação','nf.tv.'+i+'.av',v.av,false);
+    html+=mFld('Valor de Quitação Atual','nf.tv.'+i+'.bk',v.bk,false);
+        html+='<div class="fl"><label>Chave Reserva <span class="req">*</span></label><div class="rg"><label class="ro"><input type="radio" name="cr'+i+'" data-field="cr" data-idx="'+i+'" '+(v.cr==='sim'?'checked':'')+' onchange="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value" value="sim">✅ Sim</label><label class="ro"><input type="radio" name="cr'+i+'" data-field="cr" data-idx="'+i+'" '+(v.cr==='nao'?'checked':'')+' onchange="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value" value="nao">❌ Não</label></div></div>';
     html+='<div class="fl"><label>IPVA 2026</label><div class="rg"><label class="ro"><input type="radio" name="tvi'+i+'" data-field="ip" data-idx="'+i+'" '+(v.ip==='comprador'?'checked':'')+' onchange="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value" value="comprador">Comprador</label><label class="ro"><input type="radio" name="tvi'+i+'" data-field="ip" data-idx="'+i+'" '+(v.ip==='rtcar'?'checked':'')+' onchange="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value" value="rtcar">RT Car</label></div></div>';
     html+='<div class="fl full"><label>Observações do veículo</label><textarea data-field="obs" data-idx="'+i+'" oninput="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value.toUpperCase()" placeholder="AMASSADOS, RISCOS, MECÂNICA...">'+(v.obs||'')+'</textarea></div>';
     html+='</div></div>';
@@ -549,7 +548,7 @@ function bS3(f){
   html+='<div class="fl" style="margin-bottom:14px"><label>Formas utilizadas</label><div class="rg">';
   for(var i=0;i<FORMAS.length;i++){
     var fp=FORMAS[i], checked=(p.formas||[]).indexOf(fp)>-1;
-    html+='<label class="ro" style="background:'+(checked?'var(--redl)':'var(--bg3)')+';border:1px solid '+(checked?'var(--red)':'var(--bdr)')+';border-radius:7px;padding:6px 11px;font-size:12px;font-weight:500"><input type="checkbox" '+(checked?'checked':'')+' onchange="toggleForma(\'+fp+\')" style="accent-color:var(--red)"> '+fp+'</label>';
+    html+='<label class="ro" style="background:'+(checked?'var(--redl)':'var(--bg3)')+';border:1px solid '+(checked?'var(--red)':'var(--bdr)')+';border-radius:7px;padding:6px 11px;font-size:12px;font-weight:500;cursor:pointer"><input type="checkbox" data-forma="'+fp+'" '+(checked?'checked':'')+' onchange="toggleForma(this.dataset.forma)" style="accent-color:var(--red)"> '+fp+'</label>';
   }
   html+='</div></div>';
   html+='<div class="fl" style="margin-bottom:14px"><label>Descreva a negociação / condições de pagamento <span class="req">*</span></label>';
@@ -564,7 +563,7 @@ function bS3(f){
     html+=mFld('Valor Financiado','nf.py.fv',p.fv,false);
     html+='<div class="fl"><label>Nº de Parcelas</label><input value="'+p.fp+'" oninput="if(G.nf)G.nf.py.fp=this.value" placeholder="48" class="notransform" style="text-transform:none"></div>';
     html+=mFld('Valor da Parcela','nf.py.fpv',p.fpv,false);
-    html+='<div class="fl"><label>Taxa</label><input value="'+p.ft+'" oninput="if(G.nf)G.nf.py.ft=this.value" placeholder="1,2%" class="notransform" style="text-transform:none"></div>';
+    html+='<div class="fl"><label>Tabela</label><input value="'+p.ft+'" oninput="if(G.nf)G.nf.py.ft=this.value" placeholder="1,2%" class="notransform" style="text-transform:none"></div>';
     html+='<div class="fl"><label>Vencimento 1ª Parcela</label><input value="'+p.fvc+'" data-path="nf.py.fvc" oninput="onDate(this,this.dataset.path)" onchange="onDate(this,this.dataset.path)" placeholder="dd/mm/aaaa" class="notransform" style="text-transform:none" maxlength="10" inputmode="numeric"></div>';
     html+='</div>';
   }
@@ -780,7 +779,7 @@ function gerarPDF(id){
   if(t.py.hf){
     var w3=tw/3-2;
     y=lc([{l:'Banco',v:t.py.fb,x:M,w:w3},{l:'Valor Financiado',v:fmtR(t.py.fv),x:M+w3+3,w:w3},{l:'Parcelas',v:t.py.fp+'x de '+fmtR(t.py.fpv),x:M+(w3+3)*2,w:w3}],y);
-    y=lc([{l:'Taxa',v:t.py.ft,x:M,w:w3},{l:'Vencimento 1ª Parcela',v:t.py.fvc,x:M+w3+3,w:w3}],y);
+    y=lc([{l:'Tabela',v:t.py.ft,x:M,w:w3},{l:'Vencimento 1ª Parcela',v:t.py.fvc,x:M+w3+3,w:w3}],y);
   }
   y+=4;
   if(t.st==='approved'){fr(M,y,tw,8,'#e8f5ee');var gc=h2r('#1a6b3c');doc.setDrawColor(gc[0],gc[1],gc[2]);doc.setLineWidth(0.3);doc.rect(M,y,tw,8,'S');sf('bold',8,'#1a6b3c');doc.text('✓ Aprovado por Rafael Gonçalves em '+(t.at||'—'),M+3,y+5.5);y+=12;}
