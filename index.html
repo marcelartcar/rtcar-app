@@ -221,7 +221,7 @@ function bLg(){
   html += '<div style="margin-top:18px;background:var(--bg3);border-radius:9px;padding:12px;font-size:11px;color:var(--tx3)"><div style="font-weight:700;margin-bottom:6px;color:var(--tx2)">Acesso rápido:</div>';
   for(var i=0;i<G.U.length;i++){
     var u = G.U[i];
-    html += '<div style="margin-bottom:4px;cursor:pointer;color:var(--tx2)" onclick="quickL(\'\'+u.e+\'\',\'\'+u.p+\'\')">▸ '+u.e+' ('+RL[u.r]+')</div>';
+    html += '<div style="margin-bottom:4px;cursor:pointer;color:var(--tx2)" onclick="quickL(\'+u.e+\',\'+u.p+\')">▸ '+u.e+' ('+RL[u.r]+')</div>';
   }
   html += '</div></div></div></div>';
   return html;
@@ -243,7 +243,7 @@ function bSB(){
   var html = '<div class="sb"><div class="sb-logo"><img src="'+LOGO+'" style="width:90px;object-fit:contain"></div><nav class="nav">';
   for(var i=0;i<ns.length;i++){
     var n=ns[i];
-    html += '<div class="ni'+(G.pg===n.id?' on':'')+'" onclick="go(\'\'+n.id+\'\')"><span style="font-size:14px;width:18px;text-align:center">'+n.i+'</span>'+n.l+'</div>';
+    html += '<div class="ni'+(G.pg===n.id?' on':'')+'" onclick="go(\'+n.id+\')"><span style="font-size:14px;width:18px;text-align:center">'+n.i+'</span>'+n.l+'</div>';
   }
   html += '</nav><div class="sb-foot"><div style="display:flex;align-items:center;gap:9px">';
   html += '<div class="av" style="background:'+(RC[u.r]||'#888')+'">'+ini(u.n)+'</div>';
@@ -294,8 +294,8 @@ function bDB(){
     html+='<div style="overflow-x:auto"><table><thead><tr><th>ID</th><th>Comprador</th><th>Origem</th><th>Status</th><th></th></tr></thead><tbody>';
     for(var i=0;i<Math.min(T.length,5);i++){
       var x=T[i];
-      html+='<tr class="cr" onclick="go(\'dt\',\'\'+x.id+\'\')"><td><code>'+x.id+'</code></td><td style="font-weight:500">'+x.by+'</td><td style="font-size:11px;color:var(--tx3)">'+x.og+'</td><td>'+sbdg(x.st)+'</td><td>';
-      if(cA()&&x.st==='pending') html+='<button class="btn bp bsm" onclick="event.stopPropagation();G.mo=\'\'+x.id+\'\';re()">Aprovar</button>';
+      html+='<tr class="cr" onclick="go(\'dt\',\'+x.id+\')"><td><code>'+x.id+'</code></td><td style="font-weight:500">'+x.by+'</td><td style="font-size:11px;color:var(--tx3)">'+x.og+'</td><td>'+sbdg(x.st)+'</td><td>';
+      if(cA()&&x.st==='pending') html+='<button class="btn bp bsm" onclick="event.stopPropagation();G.mo=\'+x.id+\';re()">Aprovar</button>';
       html+='</td></tr>';
     }
     html+='</tbody></table></div>';
@@ -324,7 +324,7 @@ function bTL(){
   var html='<div style="display:flex;justify-content:flex-end;margin-bottom:16px">'+(cC()?'<button class="btn bp" onclick="go(\'nv\')">+ Nova Venda</button>':'')+'</div>';
   html+='<div class="tabs">';
   var tabs=[['all','Todos'],['pending','Pendentes ('+pc+')'],['mine','Meus Termos']];
-  for(var i=0;i<tabs.length;i++) html+='<div class="tab'+(tab===tabs[i][0]?' on':'')+'" onclick="G.tab=\'\'+tabs[i][0]+\'\';re()">'+tabs[i][1]+'</div>';
+  for(var i=0;i<tabs.length;i++) html+='<div class="tab'+(tab===tabs[i][0]?' on':'')+'" onclick="G.tab=\'+tabs[i][0]+\';re()">'+tabs[i][1]+'</div>';
   html+='</div>';
   html+='<div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">';
   html+='<input id="sr" placeholder="🔍 Buscar comprador, veículo, ID..." oninput="re()" value="'+sr+'" style="flex:1;min-width:160px;background:#fff;border:1px solid var(--bdr);border-radius:var(--r);padding:8px 12px;font-size:13px;font-family:var(--f);color:var(--tx);outline:none">';
@@ -337,9 +337,9 @@ function bTL(){
     html+='<div style="overflow-x:auto"><table><thead><tr><th>ID</th><th>Data</th><th>Comprador</th><th>Veículo(s)</th><th>Origem</th><th>Status</th><th></th></tr></thead><tbody>';
     for(var i=0;i<fl.length;i++){
       var t=fl[i];
-      html+='<tr class="cr" onclick="go(\'dt\',\'\'+t.id+\'\')"><td><code>'+t.id+'</code></td><td style="color:var(--tx3);font-size:12px">'+t.dt+'</td><td style="font-weight:500">'+t.by+'</td><td style="font-size:12px">'+t.sv.map(function(v){return v.m;}).join(', ')+'</td><td style="font-size:12px;color:var(--tx3)">'+t.og+'</td><td>'+sbdg(t.st)+'</td><td onclick="event.stopPropagation()">';
-      if(cA()&&t.st==='pending') html+='<button class="btn bok bsm" onclick="G.mo=\'\'+t.id+\'\';re()">✓ Aprovar</button> ';
-      if(!t.locked&&(t.cr===G.u.id||G.u.r==='admin')) html+='<button class="btn bs bsm" onclick="startEdit(\'\'+t.id+\'\')">✏ Editar</button>';
+      html+='<tr class="cr" onclick="go(\'dt\',\'+t.id+\')"><td><code>'+t.id+'</code></td><td style="color:var(--tx3);font-size:12px">'+t.dt+'</td><td style="font-weight:500">'+t.by+'</td><td style="font-size:12px">'+t.sv.map(function(v){return v.m;}).join(', ')+'</td><td style="font-size:12px;color:var(--tx3)">'+t.og+'</td><td>'+sbdg(t.st)+'</td><td onclick="event.stopPropagation()">';
+      if(cA()&&t.st==='pending') html+='<button class="btn bok bsm" onclick="G.mo=\'+t.id+\';re()">✓ Aprovar</button> ';
+      if(!t.locked&&(t.cr===G.u.id||G.u.r==='admin')) html+='<button class="btn bs bsm" onclick="startEdit(\'+t.id+\')">✏ Editar</button>';
       html+='</td></tr>';
     }
     html+='</tbody></table></div>';
@@ -364,8 +364,8 @@ function bDT(){
   if(t.locked) html+=' <span style="font-size:11px;color:var(--tx3);background:var(--bg3);padding:4px 9px;border-radius:6px">🔒 Aprovado — bloqueado</span>';
   html+=' <button class="btn bp bsm" onclick="gerarPDF('\''+t.id+'\'')">⬇ Salvar PDF</button>';
   html+=' <button class="btn bs bsm" onclick="G.pid=\''+t.id+'\';re()">👁 Visualizar</button>';
-  if(!t.locked&&(t.cr===G.u.id||G.u.r==='admin')) html+=' <button class="btn bs bsm" onclick="startEdit(\'\'+t.id+\'\')">✏ Editar</button>';
-  if(cA()&&t.st==='pending') html+=' <button class="btn bok bsm" onclick="G.mo=\'\'+t.id+\'\';re()">✓ Aprovar / Recusar</button>';
+  if(!t.locked&&(t.cr===G.u.id||G.u.r==='admin')) html+=' <button class="btn bs bsm" onclick="startEdit(\'+t.id+\')">✏ Editar</button>';
+  if(cA()&&t.st==='pending') html+=' <button class="btn bok bsm" onclick="G.mo=\'+t.id+\';re()">✓ Aprovar / Recusar</button>';
   html+='</div>';
   html+='<div style="display:grid;grid-template-columns:2fr 1fr;gap:18px"><div>';
   html+='<div class="card" style="margin-bottom:16px">';
@@ -548,7 +548,7 @@ function bS3(f){
   html+='<div class="fl" style="margin-bottom:14px"><label>Formas utilizadas</label><div class="rg">';
   for(var i=0;i<FORMAS.length;i++){
     var fp=FORMAS[i], checked=(p.formas||[]).indexOf(fp)>-1;
-    html+='<label class="ro" style="background:'+(checked?'var(--redl)':'var(--bg3)')+';border:1px solid '+(checked?'var(--red)':'var(--bdr)')+';border-radius:7px;padding:6px 11px;font-size:12px;font-weight:500"><input type="checkbox" '+(checked?'checked':'')+' onchange="toggleForma(\'\'+fp+\'\')" style="accent-color:var(--red)"> '+fp+'</label>';
+    html+='<label class="ro" style="background:'+(checked?'var(--redl)':'var(--bg3)')+';border:1px solid '+(checked?'var(--red)':'var(--bdr)')+';border-radius:7px;padding:6px 11px;font-size:12px;font-weight:500"><input type="checkbox" '+(checked?'checked':'')+' onchange="toggleForma(\'+fp+\')" style="accent-color:var(--red)"> '+fp+'</label>';
   }
   html+='</div></div>';
   html+='<div class="fl" style="margin-bottom:14px"><label>Descreva a negociação / condições de pagamento <span class="req">*</span></label>';
@@ -640,7 +640,7 @@ function bMo(){
   }
   html+='<div class="fl" style="margin-bottom:16px"><label>Observação (opcional)</label><textarea id="of" placeholder="Motivo da recusa ou observações..." style="min-height:60px"></textarea></div>';
   html+='<div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn bs" onclick="G.mo=null;re()">Cancelar</button>';
-  if(auth) html+='<button class="btn bno" onclick="dD(\'\'+t.id+\'\',\'rejected\')">✗ Recusar</button><button class="btn bok" onclick="dD(\'\'+t.id+\'\',\'approved\')">✓ Aprovar Venda</button>';
+  if(auth) html+='<button class="btn bno" onclick="dD(\'+t.id+\',\'rejected\')">✗ Recusar</button><button class="btn bok" onclick="dD(\'+t.id+\',\'approved\')">✓ Aprovar Venda</button>';
   html+='</div></div></div>';
   return html;
 }
@@ -667,7 +667,7 @@ function bNP(){
   } else {
     for(var i=0;i<G.N.length;i++){
       var n=G.N[i];
-      html+='<div style="padding:12px 16px;border-bottom:1px solid var(--bdr);cursor:pointer;background:'+(n.r?'':'#fff8f6')+'" onclick="G.no=false;\'+(n.tid?\'go(\'dt\',\'\'+n.tid+\'\')\':\'re()\')+\'"><div style="font-size:12px;line-height:1.4">'+n.msg+'</div><div style="font-size:10px;color:var(--tx3);margin-top:2px">'+n.t+'</div></div>';
+      html+='<div style="padding:12px 16px;border-bottom:1px solid var(--bdr);cursor:pointer;background:'+(n.r?'':'#fff8f6')+'" onclick="G.no=false;\'+(n.tid?\'go(\'dt\',\'+n.tid+\')\':\'re()\')+\'"><div style="font-size:12px;line-height:1.4">'+n.msg+'</div><div style="font-size:10px;color:var(--tx3);margin-top:2px">'+n.t+'</div></div>';
     }
   }
   html+='</div></div>';
