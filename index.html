@@ -430,8 +430,8 @@ function bTL(){
     for(var i=0;i<fl.length;i++){
       var t=fl[i];
       html+='<tr class="cr" onclick="go(\'dt\',\'+t.id+\')"><td><code>'+t.id+'</code></td><td style="color:var(--tx3);font-size:12px">'+t.dt+'</td><td style="font-weight:500">'+t.by+'</td><td style="font-size:12px">'+t.sv.map(function(v){return v.m;}).join(', ')+'</td><td style="font-size:12px;color:var(--tx3)">'+t.og+'</td><td>'+sbdg(t.st)+'</td><td onclick="event.stopPropagation()">';
-      if(cA()&&t.st==='pending') html+='<button class="btn bok bsm" onclick="G.mo=\'+t.id+\';re()">✓ Aprovar</button> ';
-      if(!t.locked&&(t.cr===G.u.id||G.u.r==='admin')) html+='<button class="btn bs bsm" onclick="startEdit(\'+t.id+\')">✏ Editar</button>';
+      if(cA()&&t.st==='pending') html+='<button class="btn bok bsm" data-id="'+t.id+'" onclick="G.mo=this.dataset.id;re()">✓ Aprovar</button> ';
+      if(!t.locked&&(t.cr===G.u.id||G.u.r==='admin')) html+='<button class="btn bs bsm" data-id="'+t.id+'" onclick="startEdit(this.dataset.id)">✏ Editar</button>';
       html+='</td></tr>';
     }
     html+='</tbody></table></div>';
@@ -456,10 +456,10 @@ function bDT(){
   html+='<h2 style="font-family:var(--s);font-size:21px;flex:1">Termo — '+t.id+'</h2>';
   html+=sbdg(t.st);
   if(t.locked) html+=' <span style="font-size:11px;color:var(--tx3);background:var(--bg3);padding:4px 9px;border-radius:6px">🔒 Aprovado — bloqueado</span>';
-  html+=' <button class="btn bp bsm" onclick="gerarPDF(\'+t.id+\')">⬇ Salvar PDF</button>';
-  html+=' <button class="btn bs bsm" onclick="G.pid=\'+t.id+\';re()">👁 Visualizar</button>';
-  if(!t.locked&&(t.cr===G.u.id||G.u.r==='admin')) html+=' <button class="btn bs bsm" onclick="startEdit(\'+t.id+\')">✏ Editar</button>';
-  if(cA()&&t.st==='pending') html+=' <button class="btn bok bsm" onclick="G.mo=\'+t.id+\';re()">✓ Aprovar / Recusar</button>';
+  html+=' <button class="btn bp bsm" data-id="'+t.id+'" onclick="gerarPDF(this.dataset.id)">⬇ Salvar PDF</button>';
+  html+=' <button class="btn bs bsm" data-id="'+t.id+'" onclick="G.pid=this.dataset.id;re()">👁 Visualizar</button>';
+  if(!t.locked&&(t.cr===G.u.id||G.u.r==='admin')) html+=' <button class="btn bs bsm" data-id="'+t.id+'" onclick="startEdit(this.dataset.id)">✏ Editar</button>';
+  if(cA()&&t.st==='pending') html+=' <button class="btn bok bsm" data-id="'+t.id+'" onclick="G.mo=this.dataset.id;re()">✓ Aprovar / Recusar</button>';
   if(cM()) html+=' <button class="btn" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;font-size:12px;padding:5px 11px;border-radius:6px" data-id="'+t.id+'" onclick="if(confirm(\'Excluir este termo permanentemente?\')){{var idx=G.T.findIndex(function(x){return x.id===this.dataset.id;}.bind(this));if(idx>-1){G.T.splice(idx,1);go(\'tl\');}}}" >🗑 Excluir</button>';
   html+='</div>';
   html+='<div style="display:grid;grid-template-columns:2fr 1fr;gap:18px"><div>';
@@ -772,7 +772,7 @@ function bPDFv(){
   if(!t) return '';
   var cr=G.U.find(function(u){return u.id===t.cr;});
   var html='<div class="pov" onclick="if(event.target===this){G.pid=null;re();}"><div class="pfr">';
-  html+='<div style="background:#f0f0f0;border-bottom:1px solid #ddd;padding:12px 22px;display:flex;align-items:center;justify-content:space-between"><span style="color:#333;font-weight:600;font-size:14px">Pré-visualização — '+t.id+'</span><div style="display:flex;gap:8px"><button class="btn bp bsm" onclick="gerarPDF(\'+t.id+\')">⬇ Salvar PDF</button><button class="btn bs bsm" onclick="G.pid=null;re()">× Fechar</button></div></div>';
+  html+='<div style="background:#f0f0f0;border-bottom:1px solid #ddd;padding:12px 22px;display:flex;align-items:center;justify-content:space-between"><span style="color:#333;font-weight:600;font-size:14px">Pré-visualização — '+t.id+'</span><div style="display:flex;gap:8px"><button class="btn bp bsm" data-id="'+t.id+'" onclick="gerarPDF(this.dataset.id)">⬇ Salvar PDF</button><button class="btn bs bsm" onclick="G.pid=null;re()">× Fechar</button></div></div>';
   html+='<div style="background:#e8431e;padding:18px 26px;display:flex;justify-content:space-between;align-items:center"><img src="'+LOGO+'" style="max-height:48px;width:auto;object-fit:contain;filter:brightness(10)"><div style="text-align:right"><div style="font-size:11px;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:2px">Termo de Venda</div><div style="font-size:18px;font-weight:700;color:#fff;font-family:var(--s)">'+t.id+'</div><div style="font-size:11px;color:rgba(255,255,255,.8);margin-top:3px">Data: '+t.dt+' | Origem: '+t.og+'</div></div></div>';
   html+='<div style="padding:18px 24px">';
   // Comprador
