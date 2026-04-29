@@ -196,13 +196,33 @@ var G = {
   nf:null, ns:0, auO:false, auF:{n:'',e:'',p:'',r:'seller'}
 };
 
+// ── Persistência localStorage ──────────────────────────────
+function saveData(){
+  try{
+    localStorage.setItem('rtcar_T',JSON.stringify(G.T));
+    localStorage.setItem('rtcar_U',JSON.stringify(G.U));
+    localStorage.setItem('rtcar_N',JSON.stringify(G.N));
+  }catch(e){console.warn('saveData error',e);}
+}
+function loadData(){
+  try{
+    var t=localStorage.getItem('rtcar_T');
+    var u=localStorage.getItem('rtcar_U');
+    var n=localStorage.getItem('rtcar_N');
+    if(t) G.T=JSON.parse(t);
+    if(u) G.U=JSON.parse(u);
+    if(n) G.N=JSON.parse(n);
+  }catch(e){console.warn('loadData error',e);}
+}
+// ───────────────────────────────────────────────────────────
+
 function cA(){ return G.u && (G.u.r==='manager'||G.u.r==='admin'||G.u.r==='master'); }
 function cC(){ return G.u && (G.u.r==='seller'||G.u.r==='admin'||G.u.r==='master'); }
 function cM(){ return G.u && G.u.r==='master'; }
 function isR(){ return G.u && (G.u.id===2||G.u.r==='admin'); }
 function unr(){ return G.N.filter(function(n){return !n.r;}).length; }
 
-function re(){ $('R').innerHTML = bA(); bi(); }
+function re(){ saveData(); $('R').innerHTML = bA(); bi(); }
 function go(p,id){ G.pg=p; if(id!==undefined) G.sid=id; G.no=false; G.pid=null; re(); }
 
 function bA(){
@@ -947,6 +967,7 @@ function bi(){
     if(lpw) lpw.onkeydown=function(e){if(e.key==='Enter')dL();};
   }
 }
+loadData();
 loadData();
 re();
 </script>
