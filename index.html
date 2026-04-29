@@ -373,7 +373,7 @@ function bDT(){
   html+='<div class="card" style="margin-bottom:16px">';
   // Header do termo
   html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--bdr)">';
-  html+='<img src="'+LOGO+'" style="height:38px;object-fit:contain">';
+  html+='<img src="'+LOGO+'" style="max-height:40px;width:auto;object-fit:contain">';
   html+='<div style="text-align:right"><div style="font-family:var(--s);font-size:20px">Termo de Venda</div><div style="font-size:11px;color:var(--tx3);margin-top:2px">📅 '+t.dt+' &nbsp; 📍 '+t.og+'</div></div>';
   html+='</div>';
   // Comprador
@@ -679,15 +679,15 @@ function bPDFv(){
   if(!t) return '';
   var cr=G.U.find(function(u){return u.id===t.cr;});
   var html='<div class="pov" onclick="if(event.target===this){G.pid=null;re();}"><div class="pfr">';
-  html+='<div style="background:#1a1814;padding:12px 22px;display:flex;align-items:center;justify-content:space-between"><span style="color:#fff;font-weight:600;font-size:14px">Pré-visualização — '+t.id+'</span><div style="display:flex;gap:8px"><button class="btn bp bsm" onclick="gerarPDF(\'+t.id+\')">⬇ Salvar PDF</button><button class="btn bs bsm" onclick="G.pid=null;re()">× Fechar</button></div></div>';
-  html+='<div style="background:#e8431e;padding:18px 26px;display:flex;justify-content:space-between;align-items:center"><img src="'+LOGO+'" style="height:44px;object-fit:contain;filter:brightness(10)"><div style="text-align:right"><div style="font-size:11px;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:2px">Termo de Venda</div><div style="font-size:18px;font-weight:700;color:#fff;font-family:var(--s)">'+t.id+'</div><div style="font-size:11px;color:rgba(255,255,255,.8);margin-top:3px">Data: '+t.dt+' | Origem: '+t.og+'</div></div></div>';
+  html+='<div style="background:#f0f0f0;border-bottom:1px solid #ddd;padding:12px 22px;display:flex;align-items:center;justify-content:space-between"><span style="color:#333;font-weight:600;font-size:14px">Pré-visualização — '+t.id+'</span><div style="display:flex;gap:8px"><button class="btn bp bsm" onclick="gerarPDF(\'+t.id+\')">⬇ Salvar PDF</button><button class="btn bs bsm" onclick="G.pid=null;re()">× Fechar</button></div></div>';
+  html+='<div style="background:#e8431e;padding:18px 26px;display:flex;justify-content:space-between;align-items:center"><img src="'+LOGO+'" style="max-height:48px;width:auto;object-fit:contain;filter:brightness(10)"><div style="text-align:right"><div style="font-size:11px;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:2px">Termo de Venda</div><div style="font-size:18px;font-weight:700;color:#fff;font-family:var(--s)">'+t.id+'</div><div style="font-size:11px;color:rgba(255,255,255,.8);margin-top:3px">Data: '+t.dt+' | Origem: '+t.og+'</div></div></div>';
   html+='<div style="padding:18px 24px">';
   // Comprador
-  html+='<div style="margin-bottom:14px"><div style="background:#1a1814;color:#fff;padding:4px 10px;border-radius:4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:inline-block">Dados do Comprador</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px"><div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:8px;text-transform:uppercase;color:var(--tx3)">Comprador</div><div style="font-size:12px;font-weight:500">'+t.by+'</div></div><div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:8px;text-transform:uppercase;color:var(--tx3)">Telefone</div><div style="font-size:12px;font-weight:500">'+t.ph+'</div></div></div></div>';
+  html+='<div style="margin-bottom:14px"><div style="background:#e0e0e0;color:#444;padding:4px 10px;border-radius:4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:inline-block">Dados do Comprador</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px"><div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:8px;text-transform:uppercase;color:var(--tx3)">Comprador</div><div style="font-size:12px;font-weight:500">'+t.by+'</div></div><div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:8px;text-transform:uppercase;color:var(--tx3)">Telefone</div><div style="font-size:12px;font-weight:500">'+t.ph+'</div></div></div></div>';
   // Veículos vendidos
   for(var i=0;i<t.sv.length;i++){
     var v=t.sv[i];
-    html+='<div style="margin-bottom:14px"><div style="background:#e8431e;color:#fff;padding:4px 10px;border-radius:4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:inline-block">Veículo Vendido'+(t.sv.length>1?' '+(i+1):'')+'</div>';
+    html+='<div style="margin-bottom:14px"><div style="background:#e0e0e0;color:#444;padding:4px 10px;border-radius:4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:inline-block">Veículo Vendido'+(t.sv.length>1?' '+(i+1):'')+'</div>';
     html+='<div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 14px;flex:1">';
     html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:8px;text-transform:uppercase;color:var(--tx3)">Modelo</div><div style="font-size:11px;font-weight:500">'+v.m+'</div></div>';
     html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:8px;text-transform:uppercase;color:var(--tx3)">Ano</div><div style="font-size:11px;font-weight:500">'+v.yf+'/'+v.ym+'</div></div>';
@@ -700,7 +700,7 @@ function bPDFv(){
   // Veículos de troca
   for(var i=0;i<t.tv.length;i++){
     var v=t.tv[i];
-    html+='<div style="margin-bottom:14px"><div style="background:#1e4d8c;color:#fff;padding:4px 10px;border-radius:4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:inline-block">Veículo de Troca'+(t.tv.length>1?' '+(i+1):'')+'</div>';
+    html+='<div style="margin-bottom:14px"><div style="background:#e0e0e0;color:#444;padding:4px 10px;border-radius:4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:inline-block">Veículo de Troca'+(t.tv.length>1?' '+(i+1):'')+'</div>';
     html+='<div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 14px;flex:1">';
     html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:8px;text-transform:uppercase;color:var(--tx3)">Modelo</div><div style="font-size:11px;font-weight:500">'+v.m+'</div></div>';
     html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:8px;text-transform:uppercase;color:var(--tx3)">Ano</div><div style="font-size:11px;font-weight:500">'+v.yf+'/'+v.ym+'</div></div>';
@@ -713,7 +713,7 @@ function bPDFv(){
     html+='<div style="margin-top:6px;font-size:11px">IPVA 2026: <strong>('+(v.ip==='comprador'?'X':' ')+') Comprador &nbsp; ('+(v.ip==='rtcar'?'X':' ')+') RT Car</strong></div></div>';
   }
   // Pagamento
-  html+='<div style="margin-bottom:14px"><div style="background:#1a6b3c;color:#fff;padding:4px 10px;border-radius:4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:inline-block">Formas de Pagamento</div>';
+  html+='<div style="margin-bottom:14px"><div style="background:#e0e0e0;color:#444;padding:4px 10px;border-radius:4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:inline-block">Formas de Pagamento</div>';
   if(t.py.formas&&t.py.formas.length>0){ html+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">'; for(var i=0;i<t.py.formas.length;i++) html+='<span style="background:var(--bg3);border:1px solid var(--bdr);border-radius:4px;padding:2px 8px;font-size:11px">'+t.py.formas[i]+'</span>'; html+='</div>'; }
   if(t.py.obs) html+='<div style="font-size:11px;margin-bottom:8px;color:var(--tx2)">📝 '+t.py.obs+'</div>';
   if(t.py.vo) html+='<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:11px">Valor da Volta / Pagamento:</span><span style="font-size:13px;font-weight:700;color:#e8431e">'+fmtR(t.py.vo)+'</span></div>';
@@ -723,9 +723,9 @@ function bPDFv(){
   // Assinaturas
   html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-top:20px;padding-top:16px;border-top:2px solid var(--bdr)">';
   var sigs=['RT Car Comércio de Veículos','Comprador(a): '+t.by,'Vendedor(a): '+(cr?cr.n:'—')];
-  for(var i=0;i<sigs.length;i++) html+='<div style="text-align:center"><div style="border-top:1px solid #1a1814;padding-top:6px;font-size:9px;color:var(--tx3);margin-top:32px">'+sigs[i]+'</div></div>';
+  for(var i=0;i<sigs.length;i++) html+='<div style="text-align:center"><div style="border-top:1px solid #666;padding-top:6px;font-size:9px;color:var(--tx3);margin-top:32px">'+sigs[i]+'</div></div>';
   html+='</div></div>';
-  html+='<div style="background:#1a1814;padding:9px 24px;font-size:9px;color:rgba(255,255,255,.4);text-align:center">RT Car Comércio de Veículos | Gerado em '+ts()+'</div>';
+  html+='<div style="background:#f0f0f0;padding:9px 24px;font-size:9px;color:#999;text-align:center;border-top:1px solid #ddd">RT Car Comércio de Veículos | Gerado em '+ts()+'</div>';
   html+='</div></div>';
   return html;
 }
@@ -744,12 +744,12 @@ function gerarPDF(id){
   function campo(label,valor,x,fy,w){sf('bold',7,'#888888');doc.text(label,x,fy);sf('normal',9,'#1a1814');doc.text(String(valor||'—'),x,fy+4.5,{maxWidth:w-1});dl(x,fy+6.2,x+w,fy+6.2,'#e0e0e0',0.15);}
   function campoDir(label,valor,x,fy,w){sf('bold',7,'#888888');doc.text(label,x+w,fy,{align:'right'});sf('bold',10,'#e8431e');doc.text(String(valor||'—'),x+w,fy+5,{align:'right'});dl(x,fy+6.5,x+w,fy+6.5,'#e0e0e0',0.15);}
   function lc(campos,fy){for(var i=0;i<campos.length;i++){var c=campos[i];if(c.dir) campoDir(c.l,c.v,c.x,fy,c.w);else campo(c.l,c.v,c.x,fy,c.w);}return fy+10;}
-  function secao(titulo,cor){fr(M,y,W-M*2,7,cor||'#e8431e');sf('bold',8,'#ffffff');doc.text(titulo,M+3,y+5);y+=10;}
+  function secao(titulo,cor){fr(M,y,W-M*2,7,'#e8e8e8');sf('bold',8,'#444444');doc.text(titulo,M+3,y+5);y+=10;}
   // Header
-  fr(0,0,W,28,'#1a1814');
-  try{doc.addImage(LOGO,'PNG',M,4,32,20);}catch(e){}
-  sf('bold',14,'#ffffff');doc.text('TERMO DE VENDA',W/2,12,{align:'center'});
-  sf('normal',8,'#cccccc');doc.text('Nº '+t.id,W-M,8,{align:'right'});doc.text('Data: '+t.dt,W-M,13,{align:'right'});doc.text('Origem: '+t.og,W-M,18,{align:'right'});
+  fr(0,0,W,28,'#e0e0e0');
+  try{doc.addImage(LOGO,'PNG',M,3,0,22);}catch(e){}
+  sf('bold',14,'#333333');doc.text('TERMO DE VENDA',W/2,12,{align:'center'});
+  sf('normal',8,'#666666');doc.text('Nº '+t.id,W-M,8,{align:'right'});doc.text('Data: '+t.dt,W-M,13,{align:'right'});doc.text('Origem: '+t.og,W-M,18,{align:'right'});
   y=34;
   var tw=W-M*2;
   secao('DADOS DO COMPRADOR','#1e4d8c');
@@ -794,7 +794,7 @@ function gerarPDF(id){
     sf('normal',7,'#8a867e');doc.text(sigs[i],x,y+23,{align:'center',maxWidth:sw-4});
   }
   var pages=doc.getNumberOfPages();
-  for(var i=1;i<=pages;i++){doc.setPage(i);fr(0,287,W,10,'#1a1814');sf('normal',7,'#888888');doc.text('RT Car Comércio de Veículos  |  Documento gerado em '+ts(),W/2,293,{align:'center'});}
+  for(var i=1;i<=pages;i++){doc.setPage(i);fr(0,287,W,10,'#e0e0e0');sf('normal',7,'#666666');doc.text('RT Car Comércio de Veículos  |  Documento gerado em '+ts(),W/2,293,{align:'center'});}
   doc.save('Termo_Venda_'+t.id+'.pdf');
 }
 
