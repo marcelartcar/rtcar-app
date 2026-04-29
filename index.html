@@ -341,7 +341,7 @@ function bTL(){
 
 function mFld(label, path, val, req){
   var er = req&&!val ? ' er' : '';
-  return '<div class="fl"><label>'+label+(req?' <span class="req">*</span>':'')+'</label><div class="mwrap"><span class="msym">R$</span><input value="'+(val||'')+'" oninput="onMoney(this,\'\'+path+\'\')" placeholder="0,00" inputmode="numeric" autocomplete="off" class="'+er+'"></div></div>';
+  return '<div class="fl"><label>'+label+(req?' <span class="req">*</span>':'')+'</label><div class="mwrap"><span class="msym">R$</span><input value="'+(val||'')+'" oninput="onMoney(this,\''+path+'\')" onchange="onMoney(this,\''+path+'\')" placeholder="0,00" inputmode="numeric" autocomplete="off" class="'+er+'"></div></div>';
 }
 
 function bDT(){
@@ -575,6 +575,11 @@ function nS(){
     if(!f.ph.trim()) return alert('Informe o telefone.');
   }
   if(s===1){
+    // Sincroniza campos monetários que podem não ter disparado oninput (paste, autofill)
+    document.querySelectorAll('.mwrap input').forEach(function(el){
+      var m = (el.getAttribute('oninput')||'').match(/onMoney\(this,'([^']+)'\)/);
+      if(m) onMoney(el, m[1]);
+    });
     for(var i=0;i<f.sv.length;i++){
       var v=f.sv[i];
       if(!v.m||!v.pr||!v.c||!v.km||!v.yf||!v.ym||!v.pl) return alert('Preencha todos os campos do Veículo '+(i+1)+'.');
