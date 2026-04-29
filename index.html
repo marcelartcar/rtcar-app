@@ -341,7 +341,7 @@ function bTL(){
 
 function mFld(label, path, val, req){
   var er = req&&!val ? ' er' : '';
-  return '<div class="fl"><label>'+label+(req?' <span class="req">*</span>':'')+'</label><div class="mwrap"><span class="msym">R$</span><input value="'+(val||'')+'" oninput="onMoney(this,\''+path+'\')" onchange="onMoney(this,\''+path+'\')" placeholder="0,00" inputmode="numeric" autocomplete="off" class="'+er+'"></div></div>';
+  return '<div class="fl"><label>'+label+(req?' <span class="req">*</span>':'')+'</label><div class="mwrap"><span class="msym">R$</span><input value="'+(val||'')+'" oninput="onMoney(this,\''+path+'\')" placeholder="0,00" inputmode="numeric" autocomplete="off" class="'+er+'"></div></div>';
 }
 
 function bDT(){
@@ -488,18 +488,18 @@ function bS1(f){
   for(var i=0;i<f.sv.length;i++){
     var v=f.sv[i];
     html+='<div class="vc"><div class="vch"><span style="color:var(--red)">🚗 Veículo '+(i+1)+(f.sv.length>1?' de '+f.sv.length:'')+'</span>';
-    if(f.sv.length>1) html+='<button class="btn bno bxs" onclick="if(G.nf)G.nf.sv.splice(\'+i+\',1);re()">✕ Remover</button>';
+    if(f.sv.length>1) html+='<button class="btn bno bxs" onclick="if(G.nf)G.nf.sv.splice('+i+',1);re()">✕ Remover</button>';
     html+='</div><div class="g2">';
-    html+='<div class="fl full"><label>Modelo / Marca <span class="req">*</span></label><input value="'+v.m+'" oninput="if(G.nf)G.nf.sv[\'+i+\'].m=this.value.toUpperCase()" placeholder="Ex: HONDA CIVIC EXL" class="'+(v.m?'':'er')+'"></div>';
+    html+='<div class="fl full"><label>Modelo / Marca <span class="req">*</span></label><input value="'+v.m+'" oninput="if(G.nf)G.nf.sv['+i+'].m=this.value.toUpperCase()" placeholder="Ex: HONDA CIVIC EXL" class="'+(v.m?'':'er')+'"></div>';
     html+=mFld('Valor de Venda','nf.sv.'+i+'.pr',v.pr,true);
-    html+='<div class="fl"><label>Cor <span class="req">*</span></label><input value="'+v.c+'" oninput="if(G.nf)G.nf.sv[\'+i+\'].c=this.value.toUpperCase()" placeholder="PRATA..." class="'+(v.c?'':'er')+'"></div>';
-    html+='<div class="fl"><label>Quilometragem <span class="req">*</span></label><input value="'+v.km+'" oninput="if(G.nf)G.nf.sv[\'+i+\'].km=this.value.toUpperCase()" placeholder="0 KM" class="'+(v.km?'':'er')+'"></div>';
-    html+='<div class="fl"><label>Ano Fabricação <span class="req">*</span></label><input value="'+v.yf+'" oninput="if(G.nf)G.nf.sv[\'+i+\'].yf=this.value" placeholder="2023" class="notransform '+(v.yf?'':'er')+'" style="text-transform:none"></div>';
-    html+='<div class="fl"><label>Ano Modelo <span class="req">*</span></label><input value="'+v.ym+'" oninput="if(G.nf)G.nf.sv[\'+i+\'].ym=this.value" placeholder="2024" class="notransform '+(v.ym?'':'er')+'" style="text-transform:none"></div>';
-    html+='<div class="fl"><label>Placa <span class="req">*</span></label><input value="'+v.pl+'" oninput="if(G.nf)G.nf.sv[\'+i+\'].pl=this.value.toUpperCase()" placeholder="ABC-1234" class="'+(v.pl?'':'er')+'"></div>';
+    html+='<div class="fl"><label>Cor <span class="req">*</span></label><input value="'+v.c+'" oninput="if(G.nf)G.nf.sv['+i+'].c=this.value.toUpperCase()" placeholder="PRATA..." class="'+(v.c?'':'er')+'"></div>';
+    html+='<div class="fl"><label>Quilometragem <span class="req">*</span></label><input value="'+v.km+'" oninput="if(G.nf)G.nf.sv['+i+'].km=this.value.toUpperCase()" placeholder="0 KM" class="'+(v.km?'':'er')+'"></div>';
+    html+='<div class="fl"><label>Ano Fabricação <span class="req">*</span></label><input value="'+v.yf+'" oninput="if(G.nf)G.nf.sv['+i+'].yf=this.value" placeholder="2023" class="notransform '+(v.yf?'':'er')+'" style="text-transform:none"></div>';
+    html+='<div class="fl"><label>Ano Modelo <span class="req">*</span></label><input value="'+v.ym+'" oninput="if(G.nf)G.nf.sv['+i+'].ym=this.value" placeholder="2024" class="notransform '+(v.ym?'':'er')+'" style="text-transform:none"></div>';
+    html+='<div class="fl"><label>Placa <span class="req">*</span></label><input value="'+v.pl+'" oninput="if(G.nf)G.nf.sv['+i+'].pl=this.value.toUpperCase()" placeholder="ABC-1234" class="'+(v.pl?'':'er')+'"></div>';
     html+='</div><div class="g2" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--bdr)">';
-    html+='<div class="fl"><label>IPVA 2026</label><div class="rg"><label class="ro"><input type="radio" name="ip'+i+'" '+(v.ip==='comprador'?'checked':'')+' onchange="if(G.nf)G.nf.sv[\'+i+\'].ip=\'comprador\'">Comprador</label><label class="ro"><input type="radio" name="ip'+i+'" '+(v.ip==='rtcar'?'checked':'')+' onchange="if(G.nf)G.nf.sv[\'+i+\'].ip=\'rtcar\'">RT Car</label></div></div>';
-    html+='<div class="fl"><label>Transferência</label><div class="rg"><label class="ro"><input type="radio" name="tr'+i+'" '+(v.tr==='comprador'?'checked':'')+' onchange="if(G.nf)G.nf.sv[\'+i+\'].tr=\'comprador\'">Comprador</label><label class="ro"><input type="radio" name="tr'+i+'" '+(v.tr==='rtcar'?'checked':'')+' onchange="if(G.nf)G.nf.sv[\'+i+\'].tr=\'rtcar\'">RT Car</label></div></div>';
+    html+='<div class="fl"><label>IPVA 2026</label><div class="rg"><label class="ro"><input type="radio" name="ip'+i+'" '+(v.ip==='comprador'?'checked':'')+' onchange="if(G.nf)G.nf.sv['+i+'].ip=\'comprador\'">Comprador</label><label class="ro"><input type="radio" name="ip'+i+'" '+(v.ip==='rtcar'?'checked':'')+' onchange="if(G.nf)G.nf.sv['+i+'].ip=\'rtcar\'">RT Car</label></div></div>';
+    html+='<div class="fl"><label>Transferência</label><div class="rg"><label class="ro"><input type="radio" name="tr'+i+'" '+(v.tr==='comprador'?'checked':'')+' onchange="if(G.nf)G.nf.sv['+i+'].tr=\'comprador\'">Comprador</label><label class="ro"><input type="radio" name="tr'+i+'" '+(v.tr==='rtcar'?'checked':'')+' onchange="if(G.nf)G.nf.sv['+i+'].tr=\'rtcar\'">RT Car</label></div></div>';
     html+='</div></div>';
   }
   html+='<button class="addBtn btn bs" style="width:100%;justify-content:center;margin-top:6px;border-style:dashed" onclick="if(G.nf)G.nf.sv.push(eSV());re()">+ Adicionar outro veículo vendido</button>';
@@ -511,22 +511,22 @@ function bS2(f){
   if(f.tv.length===0) html+='<div style="background:var(--bg3);border-radius:var(--r);padding:20px;text-align:center;color:var(--tx3);font-size:13px;margin-bottom:12px">Nenhum veículo de troca — clique abaixo para adicionar</div>';
   for(var i=0;i<f.tv.length;i++){
     var v=f.tv[i];
-    html+='<div class="vc"><div class="vch"><span style="color:var(--blue)">🔄 Troca '+(i+1)+(f.tv.length>1?' de '+f.tv.length:'')+'</span><button class="btn bno bxs" onclick="if(G.nf)G.nf.tv.splice(\'+i+\',1);re()">✕ Remover</button></div>';
+    html+='<div class="vc"><div class="vch"><span style="color:var(--blue)">🔄 Troca '+(i+1)+(f.tv.length>1?' de '+f.tv.length:'')+'</span><button class="btn bno bxs" onclick="if(G.nf)G.nf.tv.splice('+i+',1);re()">✕ Remover</button></div>';
     html+='<div class="g2">';
-    html+='<div class="fl full"><label>Modelo / Marca</label><input value="'+v.m+'" oninput="if(G.nf)G.nf.tv[\'+i+\'].m=this.value.toUpperCase()" placeholder="VEÍCULO DE TROCA"></div>';
+    html+='<div class="fl full"><label>Modelo / Marca</label><input value="'+v.m+'" oninput="if(G.nf)G.nf.tv['+i+'].m=this.value.toUpperCase()" placeholder="VEÍCULO DE TROCA"></div>';
     html+=mFld('Valor de Entrada','nf.tv.'+i+'.v',v.v,false);
-    html+='<div class="fl"><label>Cor</label><input value="'+v.c+'" oninput="if(G.nf)G.nf.tv[\'+i+\'].c=this.value.toUpperCase()"></div>';
-    html+='<div class="fl"><label>Km</label><input value="'+v.km+'" oninput="if(G.nf)G.nf.tv[\'+i+\'].km=this.value.toUpperCase()"></div>';
-    html+='<div class="fl"><label>Ano Fabricação</label><input value="'+v.yf+'" oninput="if(G.nf)G.nf.tv[\'+i+\'].yf=this.value" class="notransform" style="text-transform:none"></div>';
-    html+='<div class="fl"><label>Ano Modelo</label><input value="'+v.ym+'" oninput="if(G.nf)G.nf.tv[\'+i+\'].ym=this.value" class="notransform" style="text-transform:none"></div>';
-    html+='<div class="fl"><label>Placa</label><input value="'+v.pl+'" oninput="if(G.nf)G.nf.tv[\'+i+\'].pl=this.value.toUpperCase()"></div>';
+    html+='<div class="fl"><label>Cor</label><input value="'+v.c+'" oninput="if(G.nf)G.nf.tv['+i+'].c=this.value.toUpperCase()"></div>';
+    html+='<div class="fl"><label>Km</label><input value="'+v.km+'" oninput="if(G.nf)G.nf.tv['+i+'].km=this.value.toUpperCase()"></div>';
+    html+='<div class="fl"><label>Ano Fabricação</label><input value="'+v.yf+'" oninput="if(G.nf)G.nf.tv['+i+'].yf=this.value" class="notransform" style="text-transform:none"></div>';
+    html+='<div class="fl"><label>Ano Modelo</label><input value="'+v.ym+'" oninput="if(G.nf)G.nf.tv['+i+'].ym=this.value" class="notransform" style="text-transform:none"></div>';
+    html+='<div class="fl"><label>Placa</label><input value="'+v.pl+'" oninput="if(G.nf)G.nf.tv['+i+'].pl=this.value.toUpperCase()"></div>';
     html+=mFld('Valor Fipe','nf.tv.'+i+'.fi',v.fi,false);
     html+=mFld('Avaliação RT Car','nf.tv.'+i+'.av',v.av,false);
-    html+='<div class="fl"><label>Banco (Alienação)</label><input value="'+v.bk+'" oninput="if(G.nf)G.nf.tv[\'+i+\'].bk=this.value.toUpperCase()"></div>';
+    html+='<div class="fl"><label>Banco (Alienação)</label><input value="'+v.bk+'" oninput="if(G.nf)G.nf.tv['+i+'].bk=this.value.toUpperCase()"></div>';
     html+=mFld('Valor Quitação','nf.tv.'+i+'.po',v.po,false);
-    html+='<div class="fl"><label>Chave Reserva <span class="req">*</span></label><div class="rg"><label class="ro"><input type="radio" name="cr'+i+'" '+(v.cr==='sim'?'checked':'')+' onchange="if(G.nf)G.nf.tv[\'+i+\'].cr=\'sim\'">✅ Sim</label><label class="ro"><input type="radio" name="cr'+i+'" '+(v.cr==='nao'?'checked':'')+' onchange="if(G.nf)G.nf.tv[\'+i+\'].cr=\'nao\'">❌ Não</label></div></div>';
-    html+='<div class="fl"><label>IPVA 2026</label><div class="rg"><label class="ro"><input type="radio" name="tvi'+i+'" '+(v.ip==='comprador'?'checked':'')+' onchange="if(G.nf)G.nf.tv[\'+i+\'].ip=\'comprador\'">Comprador</label><label class="ro"><input type="radio" name="tvi'+i+'" '+(v.ip==='rtcar'?'checked':'')+' onchange="if(G.nf)G.nf.tv[\'+i+\'].ip=\'rtcar\'">RT Car</label></div></div>';
-    html+='<div class="fl full"><label>Observações do veículo</label><textarea oninput="if(G.nf)G.nf.tv[\'+i+\'].obs=this.value.toUpperCase()" placeholder="AMASSADOS, RISCOS, MECÂNICA...">'+v.obs+'</textarea></div>';
+    html+='<div class="fl"><label>Chave Reserva <span class="req">*</span></label><div class="rg"><label class="ro"><input type="radio" name="cr'+i+'" '+(v.cr==='sim'?'checked':'')+' onchange="if(G.nf)G.nf.tv['+i+'].cr=\'sim\'">✅ Sim</label><label class="ro"><input type="radio" name="cr'+i+'" '+(v.cr==='nao'?'checked':'')+' onchange="if(G.nf)G.nf.tv['+i+'].cr=\'nao\'">❌ Não</label></div></div>';
+    html+='<div class="fl"><label>IPVA 2026</label><div class="rg"><label class="ro"><input type="radio" name="tvi'+i+'" '+(v.ip==='comprador'?'checked':'')+' onchange="if(G.nf)G.nf.tv['+i+'].ip=\'comprador\'">Comprador</label><label class="ro"><input type="radio" name="tvi'+i+'" '+(v.ip==='rtcar'?'checked':'')+' onchange="if(G.nf)G.nf.tv['+i+'].ip=\'rtcar\'">RT Car</label></div></div>';
+    html+='<div class="fl full"><label>Observações do veículo</label><textarea oninput="if(G.nf)G.nf.tv['+i+'].obs=this.value.toUpperCase()" placeholder="AMASSADOS, RISCOS, MECÂNICA...">'+v.obs+'</textarea></div>';
     html+='</div></div>';
   }
   html+='<button class="btn bs" style="width:100%;justify-content:center;margin-top:6px;border-style:dashed" onclick="if(G.nf)G.nf.tv.push(eTV());re()">+ Adicionar veículo de troca</button>';
@@ -575,11 +575,6 @@ function nS(){
     if(!f.ph.trim()) return alert('Informe o telefone.');
   }
   if(s===1){
-    // Sincroniza campos monetários antes de validar (cobre paste, autofill, etc.)
-    document.querySelectorAll('.mwrap input').forEach(function(el){
-      var m=(el.getAttribute('oninput')||'').match(/onMoney\(this,'([^']+)'\)/);
-      if(m) onMoney(el,m[1]);
-    });
     for(var i=0;i<f.sv.length;i++){
       var v=f.sv[i];
       if(!v.m||!v.pr||!v.c||!v.km||!v.yf||!v.ym||!v.pl) return alert('Preencha todos os campos do Veículo '+(i+1)+'.');
