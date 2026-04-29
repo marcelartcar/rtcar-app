@@ -148,7 +148,7 @@ function onDate(el, path){
   if(raw.length > 2) fmt = raw.substring(0,2)+'/'+raw.substring(2);
   if(raw.length > 4) fmt = raw.substring(0,2)+'/'+raw.substring(2,4)+'/'+raw.substring(4);
   el.value = fmt;
-  if(G.nf) setPath(path, fmt);
+  setPath(path, fmt);
 }
 
 function setPath(path, val){
@@ -350,7 +350,9 @@ function bTL(){
 
 function mFld(label, path, val, req){
   var er = req&&!val ? ' er' : '';
-  return '<div class="fl"><label>'+label+(req?' <span class="req">*</span>':'')+'</label><div class="mwrap"><span class="msym">R$</span><input value="'+(val||'')+'" oninput="onMoney(this,\'+path+\')" placeholder="0,00" inputmode="numeric" autocomplete="off" class="'+er+'"></div></div>';
+  var inp = '<input value="'+(val||'')+'" data-path="'+path+'" oninput="onMoney(this,this.dataset.path)" onchange="onMoney(this,this.dataset.path)" placeholder="0,00" inputmode="numeric" autocomplete="off" class="'+er+'">';
+  return '<div class="fl"><label>'+label+(req?' <span class="req">*</span>':'')+
+    '</label><div class="mwrap"><span class="msym">R$</span>'+inp+'</div></div>';
 }
 
 function bDT(){
@@ -564,7 +566,7 @@ function bS3(f){
     html+='<div class="fl"><label>Nº de Parcelas</label><input value="'+p.fp+'" oninput="if(G.nf)G.nf.py.fp=this.value" placeholder="48" class="notransform" style="text-transform:none"></div>';
     html+=mFld('Valor da Parcela','nf.py.fpv',p.fpv,false);
     html+='<div class="fl"><label>Taxa</label><input value="'+p.ft+'" oninput="if(G.nf)G.nf.py.ft=this.value" placeholder="1,2%" class="notransform" style="text-transform:none"></div>';
-    html+='<div class="fl"><label>Vencimento 1ª Parcela</label><input value="'+p.fvc+'" oninput="onDate(this,\'nf.py.fvc\')" onchange="onDate(this,\'nf.py.fvc\')"  placeholder="dd/mm/aaaa" class="notransform" style="text-transform:none" maxlength="10" inputmode="numeric"></div>';
+    html+='<div class="fl"><label>Vencimento 1ª Parcela</label><input value="'+p.fvc+'" data-path="nf.py.fvc" oninput="onDate(this,this.dataset.path)" onchange="onDate(this,this.dataset.path)" placeholder="dd/mm/aaaa" class="notransform" style="text-transform:none" maxlength="10" inputmode="numeric"></div>';
     html+='</div>';
   }
   html+='<div class="al aw" style="margin-top:14px;margin-bottom:0"><span>ℹ</span><div>Este Termo será enviado para <strong>Rafael Gonçalves</strong> aprovar.</div></div>';
