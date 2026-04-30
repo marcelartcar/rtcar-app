@@ -271,7 +271,7 @@ function bSB(){
   var html = '<div class="sb"><div class="sb-logo"><img src="'+LOGO+'" style="width:90px;object-fit:contain;background:#1a1814;border-radius:6px;padding:6px 10px"></div><nav class="nav">';
   for(var i=0;i<ns.length;i++){
     var n=ns[i];
-    html += '<div class="ni'+(G.pg===n.id?' on':'')+'" onclick="go(\'+n.id+\')"><span style="font-size:14px;width:18px;text-align:center">'+n.i+'</span>'+n.l+'</div>';
+    html += '<div class="ni'+(G.pg===n.id?' on':'')+'" data-nid="'+n.id+'" onclick="go(this.dataset.nid)"><span style="font-size:14px;width:18px;text-align:center">'+n.i+'</span>'+n.l+'</div>';
   }
   html += '</nav><div class="sb-foot"><div style="display:flex;align-items:center;gap:9px">';
   html += '<div class="av" style="background:'+(RC[u.r]||'#888')+'">'+ini(u.n)+'</div>';
@@ -909,6 +909,7 @@ function gerarPDF(id){
     sf('normal',9,'#1a1814');doc.text('IPVA 2026: ('+(v.ip==='comprador'?'X':' ')+') Comprador   ('+(v.ip==='rtcar'?'X':' ')+') RT Car',M,y);y+=8;
   }
   secao('FORMAS DE PAGAMENTO','#1a6b3c');
+  if(t.py.vo) y=lc([{l:'Valor da Volta / Pagamento',v:fmtR(t.py.vo),x:M+tw*.62,w:tw*.38,dir:true}],y);
   if(t.py.formas&&t.py.formas.length>0){sf('normal',9,'#1a1814');doc.text('Formas: '+t.py.formas.join(', '),M,y);y+=7;}
   if(t.py.obs){
     sf('bold',8,'#888888');doc.text('NEGOCIAÇÃO / DETALHES',M,y);
@@ -918,8 +919,11 @@ function gerarPDF(id){
     dl(M,y+5.5+(obsLines.length*5.5),M+tw,y+5.5+(obsLines.length*5.5),'#e0e0e0',0.15);
     y+=8+(obsLines.length*5.5);
   }
-  if(t.py.vo) y=lc([{l:'Valor da Volta / Pagamento',v:fmtR(t.py.vo),x:M+tw*.62,w:tw*.38,dir:true}],y);
-  // financing moved to footer
+  if(t.py.hf){
+    var w3=tw/3-2;
+    y=lc([{l:'Banco',v:t.py.fb,x:M,w:w3},{l:'Valor Financiado',v:fmtR(t.py.fv),x:M+w3+3,w:w3},{l:'Parcelas',v:t.py.fp+'x de '+fmtR(t.py.fpv),x:M+(w3+3)*2,w:w3}],y);
+    y=lc([{l:'Tabela',v:t.py.ft,x:M,w:w3},{l:'Vencimento 1ª Parcela',v:t.py.fvc,x:M+w3+3,w:w3}],y);
+  }
   y+=4;
   if(t.st==='approved'){fr(M,y,tw,8,'#e8f5ee');var gc=h2r('#1a6b3c');doc.setDrawColor(gc[0],gc[1],gc[2]);doc.setLineWidth(0.3);doc.rect(M,y,tw,8,'S');sf('bold',8,'#1a6b3c');doc.text('✓ Aprovado por Rafael Gonçalves em '+(t.at||'—'),M+3,y+5.5);y+=12;}
   if(y>242){doc.addPage();y=20;}
