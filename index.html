@@ -265,6 +265,7 @@ function dL(){
   var e=$('lem').value.trim(), p=$('lpw').value;
   var u=G.U.find(function(u){return u.e===e&&u.p===p;});
   if(!u){ $('le').textContent='E-mail ou senha incorretos.'; $('le').style.display='block'; return; }
+  if(u.disabled){ $('le').textContent='Usuário inativo. Contate o administrador.'; $('le').style.display='block'; return; }
   G.u=u; go('db');
 }
 
@@ -308,6 +309,32 @@ function bPg(){
 }
 
 function bDB(){
+  // Sellers see only their own mini-dashboard
+  if(G.u.r==='seller'){
+    var myT=G.T.filter(function(x){return x.cr===G.u.id;});
+    var myAp=myT.filter(function(x){return x.st==='approved';});
+    var myPe=myT.filter(function(x){return x.st==='pending';});
+    function fmtV2(s){return parseFloat((s||'0').replace(/\./g,'').replace(',','.'))||0;}
+    var myVol=myAp.reduce(function(s,x){return s+x.sv.reduce(function(a,v){return a+fmtV2(v.pr);},0);},0);
+    var html='<div style="font-family:var(--s);font-size:19px;margin-bottom:18px">Meu Desempenho</div>';
+    html+='<div class="mts" style="grid-template-columns:repeat(3,1fr);margin-bottom:18px">';
+    html+='<div class="mt re"><div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px">Meu Volume</div><div style="font-size:22px;font-weight:700">R$ '+myVol.toLocaleString('pt-BR',{minimumFractionDigits:0})+'</div><div style="font-size:10px;color:var(--tx3);margin-top:3px">Termos aprovados</div></div>';
+    html+='<div class="mt gr"><div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px">Aprovados</div><div style="font-size:22px;font-weight:700">'+myAp.length+'</div><div style="font-size:10px;color:var(--tx3);margin-top:3px">de '+myT.length+' termos</div></div>';
+    html+='<div class="mt go"><div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px">Pendentes</div><div style="font-size:22px;font-weight:700">'+myPe.length+'</div><div style="font-size:10px;color:var(--tx3);margin-top:3px">Aguardando aprovação</div></div>';
+    html+='</div>';
+    if(myT.length===0){
+      html+='<div class="card" style="text-align:center;padding:40px;color:var(--tx3)">Você ainda não possui termos lançados.</div>';
+    } else {
+      html+='<div class="card"><div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px">Meus Termos Recentes</div>';
+      html+='<div style="overflow-x:auto"><table><thead><tr><th>ID</th><th>Comprador</th><th>Valor</th><th>Status</th></tr></thead><tbody>';
+      for(var i=0;i<Math.min(myT.length,8);i++){
+        var x=myT[i];
+        html+='<tr class="cr" data-id="'+x.id+'" onclick="go(\'dt\',this.dataset.id)"><td><code>'+x.id+'</code></td><td style="font-weight:500">'+x.by+'</td><td style="font-size:12px">R$ '+(x.sv&&x.sv[0]?x.sv[0].pr:'—')+'</td><td>'+sbdg(x.st)+'</td></tr>';
+      }
+      html+='</tbody></table></div></div>';
+    }
+    return html;
+  }
   var T=G.T;
   var ap=T.filter(function(x){return x.st==='approved';});
   var pe=T.filter(function(x){return x.st==='pending';});
@@ -960,10 +987,25 @@ function bUS(){
     html+='<div class="fl"><label>Perfil</label><select onchange="G.auF.r=this.value"><option value="seller"'+(af.r==='seller'?' selected':'')+'>Vendedor</option><option value="manager"'+(af.r==='manager'?' selected':'')+'>Gestão</option><option value="admin"'+(af.r==='admin'?' selected':'')+'>Administrador</option><option value="master"'+(af.r==='master'?' selected':'')+'>Master</option></select></div>';
     html+='</div><div style="margin-top:14px"><button class="btn bp" onclick="aU()">+ Adicionar</button></div></div>';
   }
-  html+='<div class="card" style="padding:0;overflow:hidden"><table><thead><tr><th>Usuário</th><th>E-mail</th><th>Perfil</th></tr></thead><tbody>';
+  html+='<div class="card" style="padding:0;overflow:hidden"><table><thead><tr><th>Usuário</th><th>E-mail</th><th>Perfil</th><th>Status</th><th></th></tr></thead><tbody>';
   for(var i=0;i<G.U.length;i++){
     var u=G.U[i];
-    html+='<tr><td><div style="display:flex;align-items:center;gap:10px"><div class="av" style="background:'+(RC[u.r]||'#888')+';width:32px;height:32px;font-size:11px">'+ini(u.n)+'</div><span style="font-weight:600">'+u.n+'</span></div></td><td style="color:var(--tx2);font-size:12px">'+u.e+'</td><td><span class="bdg b'+(u.r==='master'?'mst':u.r==='admin'?'adm':u.r==='manager'?'man':'sel')+'">'+RL[u.r]+'</span></td></tr>';
+    var isSelf=(u.id===G.u.id);
+    var canAct=(cM()||G.u.r==='admin')&&!isSelf;
+    var disabled=u.disabled||false;
+    html+='<tr style="opacity:'+(disabled?'0.5':'1')+'">';
+    html+='<td><div style="display:flex;align-items:center;gap:10px"><div class="av" style="background:'+(disabled?'#aaa':RC[u.r]||'#888')+';width:32px;height:32px;font-size:11px">'+ini(u.n)+'</div><span style="font-weight:600">'+u.n+'</span></div></td>';
+    html+='<td style="color:var(--tx2);font-size:12px">'+u.e+'</td>';
+    html+='<td><span class="bdg b'+(u.r==='master'?'mst':u.r==='admin'?'adm':u.r==='manager'?'man':'sel')+'">'+RL[u.r]+'</span></td>';
+    html+='<td>'+(disabled?'<span style="font-size:11px;color:#e8431e;font-weight:600">Inativo</span>':'<span style="font-size:11px;color:#1a6b3c;font-weight:600">Ativo</span>')+'</td>';
+    html+='<td style="white-space:nowrap">';
+    if(canAct){
+      html+='<button class="btn bs bsm" style="margin-right:4px" data-uid="'+u.id+'" onclick="var uid=parseInt(this.dataset.uid);var ux=G.U.find(function(x){return x.id===uid;});if(ux){ux.disabled=!ux.disabled;}re()">'+(disabled?'✓ Ativar':'⊘ Inabilitar')+'</button>';
+      html+='<button class="btn bsm" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5" data-uid="'+u.id+'" onclick="if(confirm(\'Excluir este usuário permanentemente?\')){{var uid=parseInt(this.dataset.uid);var idx=G.U.findIndex(function(x){return x.id===uid;});if(idx>-1){G.U.splice(idx,1);re();}}}">🗑</button>';
+    } else if(isSelf) {
+      html+='<span style="font-size:11px;color:var(--tx3)">Você</span>';
+    }
+    html+='</td></tr>';
   }
   html+='</tbody></table></div></div>';
   return html;
