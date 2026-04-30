@@ -199,6 +199,8 @@ var G = {
 // ── Persistência localStorage ──────────────────────────────
 function saveData(){
   try{
+    // Ensure all terms have tp field before saving
+    G.T.forEach(function(tm){ if(!tm.tp) tm.tp='VENDA FINAL'; });
     localStorage.setItem('rtcar_T',JSON.stringify(G.T));
     localStorage.setItem('rtcar_U',JSON.stringify(G.U));
     localStorage.setItem('rtcar_N',JSON.stringify(G.N));
@@ -212,6 +214,10 @@ function loadData(){
     if(t) G.T=JSON.parse(t);
     if(u) G.U=JSON.parse(u);
     if(n) G.N=JSON.parse(n);
+    // Migration: backfill missing fields on existing terms
+    G.T.forEach(function(tm){
+      if(!tm.tp) tm.tp='VENDA FINAL';
+    });
   }catch(e){console.warn('loadData error',e);}
 }
 // ───────────────────────────────────────────────────────────
