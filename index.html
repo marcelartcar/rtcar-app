@@ -138,7 +138,7 @@ function sbdg(s){
   var r = m[s]||['bdd',s];
   return '<span class="bdg '+r[0]+'">'+r[1]+'</span>';
 }
-function eSV(){ return {m:'',yf:'',ym:'',c:'',km:'',pl:'',pr:'',ip:'comprador',tr:'comprador'}; }
+function eSV(){ return {m:'',mk:'',mo:'',yf:'',ym:'',c:'',km:'',pl:'',pr:'',ip:'comprador',tr:'comprador'}; }
 function eTV(){ return {m:'',yf:'',ym:'',c:'',km:'',pl:'',v:'',fi:'',av:'',bk:'',po:'',ip:'comprador',cr:'nao',obs:''}; }
 
 function onMoney(el, path){
@@ -598,18 +598,23 @@ function bNV(){
 }
 
 function iNF(){
-  G.nf={dt:td(),og:'',by:'',ph:'',sv:[eSV()],tv:[],py:{formas:[],obs:'',vo:'',hf:false,fb:'',fv:'',fp:'',fpv:'',ft:'',fvc:''},dn:false,did:'',editMode:false,editId:null};
+  G.nf={dt:td(),og:'',by:'',ph:'',tp:'VENDA FINAL',sv:[eSV()],tv:[],py:{formas:[],obs:'',vo:'',hf:false,fb:'',fv:'',fp:'',fpv:'',ft:'',fvc:''},dn:false,did:'',editMode:false,editId:null};
   G.ns=0;
 }
 
 function bS0(f){
   var html='<div style="font-family:var(--s);font-size:19px;margin-bottom:16px">Informações Gerais</div><div class="g2">';
-  html+='<div class="fl"><label>Data</label><input type="date" value="'+f.dt+'" onchange="if(G.nf)G.nf.dt=this.value" class="notransform" style="text-transform:none"></div>';
+  var dtVal=f.dt?(f.dt.includes('/')?f.dt.split('/').reverse().join('-'):f.dt):(function(){var n=new Date();return n.getFullYear()+'-'+(('0'+(n.getMonth()+1)).slice(-2))+'-'+(('0'+n.getDate()).slice(-2));})();
+  html+='<div class="fl"><label>Data</label><input type="date" value="'+dtVal+'" onchange="if(G.nf){var p=this.value.split(\'-\');G.nf.dt=p[2]+\'/\'+p[1]+\'/\'+p[0];}" class="notransform" style="text-transform:none"></div>';
   html+='<div class="fl"><label>Origem <span class="req">*</span></label><select onchange="if(G.nf)G.nf.og=this.value" class="'+(f.og?'':'er')+'"><option value="">Selecione a origem...</option>';
   for(var i=0;i<ORIGENS.length;i++) html+='<option value="'+ORIGENS[i]+'"'+(f.og===ORIGENS[i]?' selected':'')+'>'+ORIGENS[i]+'</option>';
   html+='</select></div>';
   html+='<div class="fl full"><label>Nome do Comprador <span class="req">*</span></label><input value="'+f.by+'" oninput="if(G.nf)G.nf.by=this.value.toUpperCase()" placeholder="Nome completo" class="'+(f.by.trim()?'':'er')+'"></div>';
-  html+='<div class="fl"><label>Telefone <span class="req">*</span></label><input value="'+f.ph+'" oninput="if(G.nf)G.nf.ph=this.value" placeholder="(47) 9XXXX-XXXX" class="notransform '+(f.ph.trim()?'':'er')+'" style="text-transform:none"></div>';
+  html+='<div class="fl"><label>Telefone <span class="req">*</span></label><input value="'+f.ph+'" oninput="if(G.nf){G.nf.ph=this.value;var d=this.value.replace(/\\D/g,\'\');if(d.length===11)this.value=\'(\'+d.slice(0,2)+\') \'+d.slice(2,7)+\'-\'+d.slice(7);else if(d.length===10)this.value=\'(\'+d.slice(0,2)+\') \'+d.slice(2,6)+\'-\'+d.slice(6);}" placeholder="(47) 9XXXX-XXXX" class="notransform '+(f.ph.trim()?'':'er')+'" style="text-transform:none"></div>';
+  html+='<div class="fl"><label>Tipo de Venda</label><select onchange="if(G.nf)G.nf.tp=this.value" class="notransform" style="text-transform:none">';
+  var TPVENDAS=['VENDA FINAL','VENDA REPASSE','VENDA SEM GARANTIA'];
+  for(var tv=0;tv<TPVENDAS.length;tv++) html+='<option value="'+TPVENDAS[tv]+'"'+(f.tp===TPVENDAS[tv]?' selected':'')+'>'+TPVENDAS[tv]+'</option>';
+  html+='</select></div>';
   html+='</div>';
   return html;
 }
@@ -621,7 +626,8 @@ function bS1(f){
     html+='<div class="vc" data-idx="'+i+'"><div class="vch"><span style="color:var(--red)">🚗 Veículo '+(i+1)+(f.sv.length>1?' de '+f.sv.length:'')+'</span>';
     if(f.sv.length>1) html+='<button class="btn bno bxs" data-idx="'+i+'" onclick="G.nf.sv.splice(parseInt(this.dataset.idx),1);re()">✕ Remover</button>';
     html+='</div><div class="g2">';
-    html+='<div class="fl full"><label>Modelo / Marca <span class="req">*</span></label><input value="'+v.m+'" data-field="m" data-idx="'+i+'" oninput="G.nf.sv[parseInt(this.dataset.idx)][this.dataset.field]=this.value.toUpperCase()" placeholder="Ex: HONDA CIVIC EXL" class="'+(v.m?'':'er')+'"></div>';
+    html+='<div class="fl"><label>Marca <span class="req">*</span></label><input value="'+v.mk+'" data-field="mk" data-idx="'+i+'" oninput="var idx=parseInt(this.dataset.idx);G.nf.sv[idx][this.dataset.field]=this.value.toUpperCase();G.nf.sv[idx].m=G.nf.sv[idx].mk+(G.nf.sv[idx].mo?\' / \'+G.nf.sv[idx].mo:\'\');" placeholder="EX: HONDA" class="'+(v.mk?'':'er')+'"></div>';
+    html+='<div class="fl"><label>Modelo <span class="req">*</span></label><input value="'+v.mo+'" data-field="mo" data-idx="'+i+'" oninput="var idx=parseInt(this.dataset.idx);G.nf.sv[idx][this.dataset.field]=this.value.toUpperCase();G.nf.sv[idx].m=G.nf.sv[idx].mk+(G.nf.sv[idx].mo?\' / \'+G.nf.sv[idx].mo:\'\');" placeholder="EX: CIVIC EXL" class="'+(v.mo?'':'er')+'"></div>';
     html+=mFld('Valor de Venda','nf.sv.'+i+'.pr',v.pr,true);
     html+='<div class="fl"><label>Cor <span class="req">*</span></label><input value="'+v.c+'" data-field="c" data-idx="'+i+'" oninput="G.nf.sv[parseInt(this.dataset.idx)][this.dataset.field]=this.value.toUpperCase()" placeholder="PRATA..." class="'+(v.c?'':'er')+'"></div>';
     html+='<div class="fl"><label>Quilometragem <span class="req">*</span></label><input value="'+v.km+'" data-field="km" data-idx="'+i+'" oninput="G.nf.sv[parseInt(this.dataset.idx)][this.dataset.field]=this.value.toUpperCase()" placeholder="0 KM" class="'+(v.km?'':'er')+'"></div>';
@@ -644,7 +650,7 @@ function bS2(f){
     var v=f.tv[i];
     html+='<div class="vc"><div class="vch"><span style="color:var(--blue)">🔄 Troca '+(i+1)+(f.tv.length>1?' de '+f.tv.length:'')+'</span><button class="btn bno bxs" data-idx="'+i+'" onclick="G.nf.tv.splice(parseInt(this.dataset.idx),1);re()">✕ Remover</button></div><div class="g2">';
     html+='<div class="fl full"><label>Modelo / Marca</label><input value="'+v.m+'" data-field="m" data-idx="'+i+'" oninput="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value.toUpperCase()" placeholder="VEÍCULO DE TROCA"></div>';
-    html+=mFld('Valor Estimado','nf.tv.'+i+'.v',v.v,false);
+    html+=mFld('Valor de Entrada','nf.tv.'+i+'.v',v.v,false);
     html+='<div class="fl"><label>Cor</label><input value="'+v.c+'" data-field="c" data-idx="'+i+'" oninput="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value.toUpperCase()"></div>';
     html+='<div class="fl"><label>Km</label><input value="'+v.km+'" data-field="km" data-idx="'+i+'" oninput="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value.toUpperCase()"></div>';
     html+='<div class="fl"><label>Ano Fabricação</label><input value="'+v.yf+'" data-field="yf" data-idx="'+i+'" oninput="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value" class="notransform" style="text-transform:none"></div>';
@@ -801,7 +807,7 @@ function bPDFv(){
   var cr=G.U.find(function(u){return u.id===t.cr;});
   var html='<div class="pov" onclick="if(event.target===this){G.pid=null;re();}"><div class="pfr">';
   html+='<div style="background:#f0f0f0;border-bottom:1px solid #ddd;padding:12px 22px;display:flex;align-items:center;justify-content:space-between"><span style="color:#333;font-weight:600;font-size:14px">Pré-visualização — '+t.id+'</span><div style="display:flex;gap:8px"><button class="btn bp bsm" data-id="'+t.id+'" onclick="gerarPDF(this.dataset.id)">⬇ Salvar PDF</button><button class="btn bs bsm" onclick="G.pid=null;re()">× Fechar</button></div></div>';
-  html+='<div style="background:#e8431e;padding:18px 26px;display:flex;justify-content:space-between;align-items:center"><img src="'+LOGO+'" style="max-height:48px;width:auto;object-fit:contain;border-radius:6px"><div style="text-align:right"><div style="font-size:11px;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:2px">Termo de Venda</div><div style="font-size:18px;font-weight:700;color:#fff;font-family:var(--s)">'+t.id+'</div><div style="font-size:11px;color:rgba(255,255,255,.8);margin-top:3px">Data: '+t.dt+' | Origem: '+t.og+'</div></div></div>';
+  html+='<div style="background:#e8431e;padding:18px 26px;display:flex;justify-content:space-between;align-items:center"><img src="'+LOGO+'" style="max-height:48px;width:auto;object-fit:contain;border-radius:6px"><div style="text-align:right"><div style="font-size:11px;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:2px">Termo de Venda</div><div style="font-size:10px;color:rgba(255,255,255,.85);margin-top:2px">'+(t.tp||'VENDA FINAL')+'</div><div style="font-size:18px;font-weight:700;color:#fff;font-family:var(--s)">'+t.id+'</div><div style="font-size:11px;color:rgba(255,255,255,.8);margin-top:3px">Data: '+t.dt+' | Origem: '+t.og+'</div></div></div>';
   html+='<div style="padding:18px 24px">';
   // Comprador
   html+='<div style="margin-bottom:14px"><div style="background:#e0e0e0;color:#444;padding:4px 10px;border-radius:4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:inline-block">Dados do Comprador</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px"><div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:8px;text-transform:uppercase;color:var(--tx3)">Comprador</div><div style="font-size:12px;font-weight:500">'+t.by+'</div></div><div style="border-bottom:1px solid var(--bdr);padding-bottom:4px"><div style="font-size:8px;text-transform:uppercase;color:var(--tx3)">Telefone</div><div style="font-size:12px;font-weight:500">'+t.ph+'</div></div></div></div>';
@@ -828,7 +834,7 @@ function bPDFv(){
     html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Modelo</div><div style="font-size:13px;font-weight:600">'+v.m+'</div></div>';
     html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Ano</div><div style="font-size:13px;font-weight:500">'+v.yf+'/'+v.ym+'</div></div>';
     html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Km</div><div style="font-size:13px;font-weight:500">'+v.km+'</div></div>';
-    html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:5px;text-align:right"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Valor Estimado</div><div style="font-size:18px;font-weight:700;color:#e8431e">'+fmtR(v.v)+'</div></div>';
+    html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:5px;text-align:right"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Valor de Entrada</div><div style="font-size:18px;font-weight:700;color:#e8431e">'+fmtR(v.v)+'</div></div>';
     html+='</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px 14px;margin-bottom:4px">';
     html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Placa</div><div style="font-size:13px;font-weight:500">'+v.pl+'</div></div>';
     html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Chave Reserva</div><div style="font-size:13px;font-weight:500">'+(v.cr==='sim'?'Sim':'Não')+'</div></div>';
@@ -869,19 +875,21 @@ function gerarPDF(id){
   function sf(st,sz,col){doc.setFont('helvetica',st);doc.setFontSize(sz);var c=h2r(col||'#1a1814');doc.setTextColor(c[0],c[1],c[2]);}
   function fr(x,fy,w,h,col){var c=h2r(col);doc.setFillColor(c[0],c[1],c[2]);doc.rect(x,fy,w,h,'F');}
   function dl(x1,y1,x2,y2,col,lw){var c=h2r(col||'#e0e0e0');doc.setDrawColor(c[0],c[1],c[2]);doc.setLineWidth(lw||0.2);doc.line(x1,y1,x2,y2);}
+  function fmtDt(d){ if(!d) return '—'; var p=d.split('/'); return p.length===3?p[0]+'/'+p[1]+'/'+p[2].slice(-2):d; }
+  function fmtPh(p){ if(!p) return '—'; var d=p.replace(/\D/g,''); if(d.length===11) return '('+d.slice(0,2)+') '+d.slice(2,7)+'-'+d.slice(7); if(d.length===10) return '('+d.slice(0,2)+') '+d.slice(2,6)+'-'+d.slice(6); return p; }
   function campo(label,valor,x,fy,w){sf('bold',8,'#888888');doc.text(label,x,fy);sf('normal',10,'#1a1814');doc.text(String(valor||'—'),x,fy+4.5,{maxWidth:w-1});dl(x,fy+6.2,x+w,fy+6.2,'#e0e0e0',0.15);}
   function campoDir(label,valor,x,fy,w){sf('bold',8,'#888888');doc.text(label,x+w,fy,{align:'right'});sf('bold',12,'#e8431e');doc.text(String(valor||'—'),x+w,fy+5,{align:'right'});dl(x,fy+6.5,x+w,fy+6.5,'#e0e0e0',0.15);}
   function lc(campos,fy){for(var i=0;i<campos.length;i++){var c=campos[i];if(c.dir) campoDir(c.l,c.v,c.x,fy,c.w);else campo(c.l,c.v,c.x,fy,c.w);}return fy+12;}
-  function secao(titulo,cor){fr(M,y,W-M*2,7,'#e8e8e8');sf('bold',9,'#444444');doc.text(titulo,M+3,y+5);y+=10;}
+  function secao(titulo,cor){fr(M,y,W-M*2,7,'#e8e8e8');sf('bold',9,'#444444');doc.text(titulo,W/2,y+5,{align:'center'});y+=10;}
   // Header
   fr(0,0,W,28,'#e0e0e0');
   try{doc.addImage(LOGO,'PNG',M,3,0,22);}catch(e){}
-  sf('bold',20,'#333333');doc.text('TERMO DE VENDA',W/2,12,{align:'center'});
-  sf('normal',9,'#666666');doc.text('Nº '+t.id,W-M,8,{align:'right'});doc.text('Data: '+t.dt,W-M,13,{align:'right'});doc.text('Origem: '+t.og,W-M,18,{align:'right'});
+  sf('bold',20,'#333333');doc.text('TERMO DE VENDA',W/2,10,{align:'center'});sf('bold',9,'#333333');doc.text(t.tp||'VENDA FINAL',W/2,16,{align:'center'});
+  sf('normal',9,'#666666');doc.text('Data: '+fmtDt(t.dt),W-M,8,{align:'right'});doc.text('Origem: '+t.og,W-M,14,{align:'right'});
   y=34;
   var tw=W-M*2;
   secao('DADOS DO COMPRADOR','#1e4d8c');
-  y=lc([{l:'Comprador',v:t.by,x:M,w:tw/2-2},{l:'Telefone',v:t.ph,x:M+tw/2+2,w:tw/2-2}],y);y+=4;
+  y=lc([{l:'Comprador',v:t.by,x:M,w:tw/2-2},{l:'Telefone',v:fmtPh(t.ph),x:M+tw/2+2,w:tw/2-2}],y);y+=4;
   for(var i=0;i<t.sv.length;i++){
     var v=t.sv[i];
     secao('VEÍCULO VENDIDO'+(t.sv.length>1?' '+(i+1):''));
@@ -893,7 +901,7 @@ function gerarPDF(id){
   for(var i=0;i<t.tv.length;i++){
     var v=t.tv[i];
     secao('VEÍCULO DE TROCA'+(t.tv.length>1?' '+(i+1):''),'#1e4d8c');
-    y=lc([{l:'Modelo / Marca',v:v.m,x:M,w:tw*.40},{l:'Ano Fab./Mod.',v:v.yf+'/'+v.ym,x:M+tw*.42,w:tw*.16},{l:'Cor',v:v.c,x:M+tw*.60,w:tw*.16},{l:'Valor Estimado',v:fmtR(v.v),x:M+tw*.78,w:tw*.22,dir:true}],y);
+    y=lc([{l:'Modelo / Marca',v:v.m,x:M,w:tw*.40},{l:'Ano Fab./Mod.',v:v.yf+'/'+v.ym,x:M+tw*.42,w:tw*.16},{l:'Cor',v:v.c,x:M+tw*.60,w:tw*.16},{l:'Valor de Entrada',v:fmtR(v.v),x:M+tw*.78,w:tw*.22,dir:true}],y);
     y=lc([{l:'Quilometragem',v:v.km,x:M,w:tw*.28},{l:'Placa',v:v.pl,x:M+tw*.30,w:tw*.22},{l:'Chave Reserva',v:v.cr==='sim'?'Sim':'Não',x:M+tw*.54,w:tw*.46}],y);
     y=lc([{l:'Avaliação',v:fmtR(v.av),x:M,w:tw*.35},{l:'Valor Fipe',v:fmtR(v.po),x:M+tw*.37,w:tw*.63}],y);
     if(v.fi||v.bk) y=lc([{l:'Banco Alienação',v:v.fi||'—',x:M,w:tw*.45},{l:'Valor Quitação',v:fmtR(v.bk),x:M+tw*.47,w:tw*.53}],y);
@@ -902,13 +910,16 @@ function gerarPDF(id){
   }
   secao('FORMAS DE PAGAMENTO','#1a6b3c');
   if(t.py.formas&&t.py.formas.length>0){sf('normal',9,'#1a1814');doc.text('Formas: '+t.py.formas.join(', '),M,y);y+=7;}
-  if(t.py.obs) y=lc([{l:'Negociação / Detalhes',v:t.py.obs,x:M,w:tw}],y);
-  if(t.py.vo) y=lc([{l:'Valor da Volta / Pagamento',v:fmtR(t.py.vo),x:M+tw*.62,w:tw*.38,dir:true}],y);
-  if(t.py.hf){
-    var w3=tw/3-2;
-    y=lc([{l:'Banco',v:t.py.fb,x:M,w:w3},{l:'Valor Financiado',v:fmtR(t.py.fv),x:M+w3+3,w:w3},{l:'Parcelas',v:t.py.fp+'x de '+fmtR(t.py.fpv),x:M+(w3+3)*2,w:w3}],y);
-    y=lc([{l:'Tabela',v:t.py.ft,x:M,w:w3},{l:'Vencimento 1ª Parcela',v:t.py.fvc,x:M+w3+3,w:w3}],y);
+  if(t.py.obs){
+    sf('bold',8,'#888888');doc.text('NEGOCIAÇÃO / DETALHES',M,y);
+    sf('normal',10,'#1a1814');
+    var obsLines=doc.splitTextToSize(t.py.obs,tw);
+    for(var ol=0;ol<obsLines.length;ol++){doc.text(obsLines[ol],M,y+4.5+(ol*5.5));}
+    dl(M,y+5.5+(obsLines.length*5.5),M+tw,y+5.5+(obsLines.length*5.5),'#e0e0e0',0.15);
+    y+=8+(obsLines.length*5.5);
   }
+  if(t.py.vo) y=lc([{l:'Valor da Volta / Pagamento',v:fmtR(t.py.vo),x:M+tw*.62,w:tw*.38,dir:true}],y);
+  // financing moved to footer
   y+=4;
   if(t.st==='approved'){fr(M,y,tw,8,'#e8f5ee');var gc=h2r('#1a6b3c');doc.setDrawColor(gc[0],gc[1],gc[2]);doc.setLineWidth(0.3);doc.rect(M,y,tw,8,'S');sf('bold',8,'#1a6b3c');doc.text('✓ Aprovado por Rafael Gonçalves em '+(t.at||'—'),M+3,y+5.5);y+=12;}
   if(y>242){doc.addPage();y=20;}
