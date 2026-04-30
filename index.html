@@ -443,7 +443,7 @@ function bTL(){
   var html='<div style="display:flex;justify-content:flex-end;margin-bottom:16px">'+(cC()?'<button class="btn bp" onclick="go(\'nv\')">+ Nova Venda</button>':'')+'</div>';
   html+='<div class="tabs">';
   var tabs=[['all','Todos'],['pending','Pendentes ('+pc+')'],['mine','Meus Termos']];
-  for(var i=0;i<tabs.length;i++) html+='<div class="tab'+(tab===tabs[i][0]?' on':'')+'" onclick="G.tab=\'+tabs[i][0]+\';re()">'+tabs[i][1]+'</div>';
+  for(var i=0;i<tabs.length;i++) html+='<div class="tab'+(tab===tabs[i][0]?' on':'')+'" data-tab="'+tabs[i][0]+'" onclick="G.tab=this.dataset.tab;re()">'+tabs[i][1]+'</div>';
   html+='</div>';
   html+='<div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">';
   html+='<input id="sr" placeholder="🔍 Buscar comprador, veículo, ID..." oninput="re()" value="'+sr+'" style="flex:1;min-width:160px;background:#fff;border:1px solid var(--bdr);border-radius:var(--r);padding:8px 12px;font-size:13px;font-family:var(--f);color:var(--tx);outline:none">';
@@ -456,7 +456,7 @@ function bTL(){
     html+='<div style="overflow-x:auto"><table><thead><tr><th>ID</th><th>Data</th><th>Comprador</th><th>Veículo(s)</th><th>Origem</th><th>Status</th><th></th></tr></thead><tbody>';
     for(var i=0;i<fl.length;i++){
       var t=fl[i];
-      html+='<tr class="cr" onclick="go(\'dt\',\'+t.id+\')"><td><code>'+t.id+'</code></td><td style="color:var(--tx3);font-size:12px">'+t.dt+'</td><td style="font-weight:500">'+t.by+'</td><td style="font-size:12px">'+t.sv.map(function(v){return v.m;}).join(', ')+'</td><td style="font-size:12px;color:var(--tx3)">'+t.og+'</td><td>'+sbdg(t.st)+'</td><td onclick="event.stopPropagation()">';
+      html+='<tr class="cr" data-id="'+t.id+'" onclick="go(\'dt\',this.dataset.id)"><td><code>'+t.id+'</code></td><td style="color:var(--tx3);font-size:12px">'+t.dt+'</td><td style="font-weight:500">'+t.by+'</td><td style="font-size:12px">'+t.sv.map(function(v){return v.m;}).join(', ')+'</td><td style="font-size:12px;color:var(--tx3)">'+t.og+'</td><td>'+sbdg(t.st)+'</td><td onclick="event.stopPropagation()">';
       if(cA()&&t.st==='pending') html+='<button class="btn bok bsm" data-id="'+t.id+'" onclick="G.mo=this.dataset.id;re()">✓ Aprovar</button> ';
       if(!t.locked&&(t.cr===G.u.id||G.u.r==='admin')) html+='<button class="btn bs bsm" data-id="'+t.id+'" onclick="startEdit(this.dataset.id)">✏ Editar</button>';
       html+='</td></tr>';
@@ -515,9 +515,9 @@ function bDT(){
     html+='<div class="sb2"><div class="sb2t"><div class="dot" style="background:#1e4d8c"></div>Veículo de Troca'+(t.tv.length>1?' '+(i+1):'')+'</div>';
     html+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">';
     html+='<div class="dg3" style="flex:1"><div class="df"><div class="dfl">Modelo</div><div class="dfv">'+v.m+'</div></div><div class="df"><div class="dfl">Ano</div><div class="dfv">'+v.yf+'/'+v.ym+'</div></div><div class="df"><div class="dfl">Cor</div><div class="dfv">'+v.c+'</div></div><div class="df"><div class="dfl">Km</div><div class="dfv">'+v.km+'</div></div><div class="df"><div class="dfl">Placa</div><div class="dfv">'+v.pl+'</div></div><div class="df"><div class="dfl">Chave Reserva</div><div class="dfv">'+(v.cr==='sim'?'✅ Sim':'❌ Não')+'</div></div></div>';
-    html+='<div style="text-align:right;min-width:120px"><div class="dfl">Valor Entrada</div><div class="price-r">'+fmtR(v.v)+'</div><div style="margin-top:6px"><div class="dfl">Fipe</div><div style="font-size:13px;font-weight:500">'+fmtR(v.fi)+'</div></div><div style="margin-top:6px"><div class="dfl">Avaliação</div><div style="font-size:13px;font-weight:500">'+fmtR(v.av)+'</div></div></div>';
+    html+='<div style="text-align:right;min-width:120px"><div class="dfl">Valor Entrada</div><div class="price-r">'+fmtR(v.v)+'</div><div style="margin-top:6px"><div class="dfl">Fipe</div><div style="font-size:13px;font-weight:500">'+fmtR(v.po)+'</div></div><div style="margin-top:6px"><div class="dfl">Avaliação</div><div style="font-size:13px;font-weight:500">'+fmtR(v.av)+'</div></div></div>';
     html+='</div>';
-    if(v.bk) html+='<div class="dg2" style="margin-top:8px"><div class="df"><div class="dfl">Banco (Alienação)</div><div class="dfv">'+v.bk+'</div></div><div class="df"><div class="dfl">Valor Quitação</div><div class="dfv">'+fmtR(v.po)+'</div></div></div>';
+    if(v.fi||v.bk) html+='<div class="dg2" style="margin-top:8px"><div class="df"><div class="dfl">Banco (Alienação)</div><div class="dfv">'+(v.fi||'—')+'</div></div><div class="df"><div class="dfl">Valor Quitação</div><div class="dfv">'+fmtR(v.bk)+'</div></div></div>';
     if(v.obs) html+='<div class="df" style="margin-top:8px"><div class="dfl">Observações</div><div class="dfv" style="color:var(--tx2);font-style:italic">'+v.obs+'</div></div>';
     html+='<div class="dg2" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bdr)"><div class="df"><div class="dfl">IPVA 2026</div><div class="dfv">'+(v.ip==='comprador'?'Comprador':'RT Car')+'</div></div></div></div>';
   }
