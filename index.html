@@ -728,7 +728,7 @@ function sT(){
   var f=G.nf;
   if(f.editMode){ saveEdit(); return; }
   var id=nId();
-  var novoTermo={id:id,dt:f.dt,og:f.og,by:f.by,ph:f.ph,sv:JSON.parse(JSON.stringify(f.sv)),tv:JSON.parse(JSON.stringify(f.tv)),py:JSON.parse(JSON.stringify(f.py)),st:'pending',cr:G.u.id,ab:null,at:null,locked:false,lg:[{a:'Criado e enviado para aprovação',u:G.u.n,t:ts()}]};
+  var novoTermo={id:id,dt:f.dt,og:f.og,by:f.by,ph:f.ph,tp:f.tp||'VENDA FINAL',sv:JSON.parse(JSON.stringify(f.sv)),tv:JSON.parse(JSON.stringify(f.tv)),py:JSON.parse(JSON.stringify(f.py)),st:'pending',cr:G.u.id,ab:null,at:null,locked:false,lg:[{a:'Criado e enviado para aprovação',u:G.u.n,t:ts()}]};
   G.T.unshift(novoTermo);
   G.N.unshift({id:Date.now(),msg:'🚗 Novo Termo '+id+' aguardando aprovação — '+f.by+' (por '+G.u.n+')',t:ts().slice(0,11),r:false,tid:id});
   G.nf.dn=true; G.nf.did=id; re();
@@ -875,7 +875,7 @@ function gerarPDF(id){
   function sf(st,sz,col){doc.setFont('helvetica',st);doc.setFontSize(sz);var c=h2r(col||'#1a1814');doc.setTextColor(c[0],c[1],c[2]);}
   function fr(x,fy,w,h,col){var c=h2r(col);doc.setFillColor(c[0],c[1],c[2]);doc.rect(x,fy,w,h,'F');}
   function dl(x1,y1,x2,y2,col,lw){var c=h2r(col||'#e0e0e0');doc.setDrawColor(c[0],c[1],c[2]);doc.setLineWidth(lw||0.2);doc.line(x1,y1,x2,y2);}
-  function fmtDt(d){ if(!d) return '—'; var p=d.split('/'); return p.length===3?p[0]+'/'+p[1]+'/'+p[2].slice(-2):d; }
+  function fmtDt(d){ if(!d) return '—'; if(d.includes('-')){ var p=d.split('-'); return p[2]+'/'+p[1]+'/'+p[0].slice(-2); } var p=d.split('/'); return p.length===3?p[0]+'/'+p[1]+'/'+p[2].slice(-2):d; }
   function fmtPh(p){ if(!p) return '—'; var d=p.replace(/\D/g,''); if(d.length===11) return '('+d.slice(0,2)+') '+d.slice(2,7)+'-'+d.slice(7); if(d.length===10) return '('+d.slice(0,2)+') '+d.slice(2,6)+'-'+d.slice(6); return p; }
   function campo(label,valor,x,fy,w){sf('bold',8,'#888888');doc.text(label,x,fy);sf('normal',10,'#1a1814');doc.text(String(valor||'—'),x,fy+4.5,{maxWidth:w-1});dl(x,fy+6.2,x+w,fy+6.2,'#e0e0e0',0.15);}
   function campoDir(label,valor,x,fy,w){sf('bold',8,'#888888');doc.text(label,x+w,fy,{align:'right'});sf('bold',12,'#e8431e');doc.text(String(valor||'—'),x+w,fy+5,{align:'right'});dl(x,fy+6.5,x+w,fy+6.5,'#e0e0e0',0.15);}
