@@ -139,7 +139,7 @@ function sbdg(s){
   return '<span class="bdg '+r[0]+'">'+r[1]+'</span>';
 }
 function eSV(){ return {m:'',mk:'',mo:'',yf:'',ym:'',c:'',km:'',pl:'',pr:'',ip:'comprador',tr:'comprador'}; }
-function eTV(){ return {m:'',yf:'',ym:'',c:'',km:'',pl:'',v:'',fi:'',av:'',bk:'',po:'',ip:'comprador',cr:'nao',obs:''}; }
+function eTV(){ return {m:'',mk:'',mo:'',yf:'',ym:'',c:'',km:'',pl:'',v:'',fi:'',av:'',bk:'',po:'',ip:'comprador',cr:'nao',obs:''}; }
 
 function onMoney(el, path){
   var raw = el.value.replace(/\D/g,'');
@@ -193,34 +193,94 @@ var G = {
     {id:1,msg:'🚗 Novo Termo TRM-002 aguardando aprovação — Maria Fernanda Costa',t:'15/04 10:45',r:false,tid:'TRM-002'},
     {id:2,msg:'✅ Termo TRM-001 aprovado.',t:'11/04 09:15',r:true,tid:'TRM-001'}
   ],
-  nf:null, ns:0, auO:false, auF:{n:'',e:'',p:'',r:'seller'}
+  nf:null, ns:0, rf:{dt1:'',dt2:'',cli:'',veh:''}, auO:false, auF:{n:'',e:'',p:'',r:'seller'}
 };
 
-// ── Persistência localStorage ──────────────────────────────
+// ── Persistência Google Sheets + localStorage (fallback) ────
+var GS_URL = 'https://script.google.com/macros/s/AKfycbwonFJodV8_H-eofj7Q10qFLkbKk-aEAhSNIlZwPvXWtlBjddnIz31lZUZLhmnPnhjp/exec';
+var GS_SAVING = false;
+
+function migrate(T){
+  T.forEach(function(tm){ if(!tm.tp) tm.tp='VENDA FINAL'; });
+  return T;
+}
+
+// Salva localmente SEMPRE (rápido) e envia ao Sheets (assíncrono)
 function saveData(){
   try{
-    // Ensure all terms have tp field before saving
-    G.T.forEach(function(tm){ if(!tm.tp) tm.tp='VENDA FINAL'; });
-    localStorage.setItem('rtcar_T',JSON.stringify(G.T));
-    localStorage.setItem('rtcar_U',JSON.stringify(G.U));
-    localStorage.setItem('rtcar_N',JSON.stringify(G.N));
-  }catch(e){console.warn('saveData error',e);}
+    migrate(G.T);
+    localStorage.setItem('rtcar_T', JSON.stringify(G.T));
+    localStorage.setItem('rtcar_U', JSON.stringify(G.U));
+    localStorage.setItem('rtcar_N', JSON.stringify(G.N));
+  }catch(e){ console.warn('localStorage error', e); }
+
+  if(!GS_URL) return;
+  if(GS_SAVING) return; // evita flood
+  GS_SAVING = true;
+  fetch(GS_URL, {
+    method: 'POST',
+    body: JSON.stringify({action:'saveAll', T:G.T, U:G.U, N:G.N})
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    GS_SAVING = false;
+    if(d.ok) showSyncStatus('✓ Salvo na nuvem', '#1a6b3c');
+    else showSyncStatus('⚠ Erro ao salvar: '+d.error, '#e8431e');
+  })
+  .catch(function(e){
+    GS_SAVING = false;
+    showSyncStatus('⚠ Sem conexão — salvo localmente', '#b8860b');
+  });
 }
+
+// Carrega do Sheets; se falhar usa localStorage
 function loadData(){
+  // Sempre carrega local primeiro (instantâneo)
   try{
     var t=localStorage.getItem('rtcar_T');
     var u=localStorage.getItem('rtcar_U');
     var n=localStorage.getItem('rtcar_N');
-    if(t) G.T=JSON.parse(t);
+    if(t) G.T=migrate(JSON.parse(t));
     if(u) G.U=JSON.parse(u);
     if(n) G.N=JSON.parse(n);
-    // Migration: backfill missing fields on existing terms
-    G.T.forEach(function(tm){
-      if(!tm.tp) tm.tp='VENDA FINAL';
-    });
-  }catch(e){console.warn('loadData error',e);}
+  }catch(e){ console.warn('localStorage load error', e); }
+
+  // Depois tenta carregar do Sheets (mais atualizado)
+  if(!GS_URL) return;
+  showSyncStatus('↻ Sincronizando...', '#1e4d8c');
+  fetch(GS_URL+'?t='+Date.now())
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if(!d.ok) { showSyncStatus('', ''); return; }
+    if(d.T && d.T.length > 0){
+      G.T = migrate(d.T);
+      localStorage.setItem('rtcar_T', JSON.stringify(G.T));
+    }
+    if(d.U && d.U.length > 0){
+      G.U = d.U;
+      localStorage.setItem('rtcar_U', JSON.stringify(G.U));
+    }
+    if(d.N && d.N.length > 0){
+      G.N = d.N;
+      localStorage.setItem('rtcar_N', JSON.stringify(G.N));
+    }
+    showSyncStatus('✓ Dados sincronizados', '#1a6b3c');
+    setTimeout(function(){ showSyncStatus('',''); re(); }, 1500);
+  })
+  .catch(function(){
+    showSyncStatus('⚠ Offline — usando dados locais', '#b8860b');
+    setTimeout(function(){ showSyncStatus('',''); }, 3000);
+  });
 }
-// ───────────────────────────────────────────────────────────
+
+function showSyncStatus(msg, color){
+  var el = document.getElementById('syncStatus');
+  if(!el) return;
+  el.textContent = msg;
+  el.style.color = color;
+  el.style.display = msg ? 'inline' : 'none';
+}
+// ─────────────────────────────────────────────────────────────
 
 function cA(){ return G.u && (G.u.r==='manager'||G.u.r==='admin'||G.u.r==='master'); }
 function cC(){ return G.u && (G.u.r==='seller'||G.u.r==='admin'||G.u.r==='master'); }
@@ -271,7 +331,7 @@ function dL(){
 
 function bSB(){
   var u=G.u;
-  var ns=[{id:'db',i:'▣',l:'Dashboard'},{id:'tl',i:'≡',l:'Termos de Venda'}];
+  var ns=[{id:'db',i:'▣',l:'Dashboard'},{id:'tl',i:'≡',l:'Termos de Venda'},{id:'rl',i:'⊞',l:'Relatórios'}];
   if(cC()) ns.push({id:'nv',i:'+',l:'Nova Venda'});
   if(u.r==='admin'||u.r==='master') ns.push({id:'us',i:'◉',l:'Usuários'});
   ns.push({id:'pr',i:'⊙',l:'Meu Perfil'});
@@ -289,7 +349,7 @@ function bSB(){
 }
 
 function bTB(){
-  var tt={db:'Dashboard',tl:'Termos de Venda',nv:'Nova Venda',dt:'Detalhe do Termo',us:'Usuários',pr:'Meu Perfil'};
+  var tt={db:'Dashboard',tl:'Termos de Venda',nv:'Nova Venda',dt:'Detalhe do Termo',us:'Usuários',pr:'Meu Perfil',rl:'Relatórios'};
   var u=unr();
   var html='<div class="tb"><div style="font-size:14px;font-weight:700;color:var(--tx)">'+(tt[G.pg]||'RT Car')+'</div><div style="display:flex;align-items:center;gap:10px">';
   html+='<button class="nb" onclick="G.no=!G.no;re()">🔔'+(u>0?'<span class="ndot"></span>':'')+'</button>';
@@ -305,7 +365,79 @@ function bPg(){
   if(G.pg==='dt') return bDT();
   if(G.pg==='us') return bUS();
   if(G.pg==='pr') return bPR();
+  if(G.pg==='rl') return bRL();
   return '';
+}
+
+
+function resetRL(){G.rf={dt1:'',dt2:'',cli:'',veh:''};re();}
+function bRL(){
+  var u=G.u;
+  var rf=G.rf||{dt1:'',dt2:'',cli:'',veh:''};
+  var src=(u.r==='seller')?G.T.filter(function(x){return x.cr===u.id;}):G.T;
+  var filtered=src.filter(function(t){
+    if(rf.cli&&t.by.toUpperCase().indexOf(rf.cli.toUpperCase())<0) return false;
+    if(rf.veh){
+      var vm=(t.sv||[]).map(function(v){return (v.m||'').toUpperCase();}).join(' ');
+      if(vm.indexOf(rf.veh.toUpperCase())<0) return false;
+    }
+    if(rf.dt1){var d1=rf.dt1.split('-').reverse().join('/');if(t.dt<d1)return false;}
+    if(rf.dt2){var d2=rf.dt2.split('-').reverse().join('/');if(t.dt>d2)return false;}
+    return true;
+  });
+  function fmtV(s){return parseFloat((s||'0').replace(/\./g,'').replace(',','.'))||0;}
+  var ap=filtered.filter(function(x){return x.st==='approved';});
+  var pe=filtered.filter(function(x){return x.st==='pending';});
+  var vol=ap.reduce(function(s,x){return s+x.sv.reduce(function(a,v){return a+fmtV(v.pr);},0);},0);
+  var html='';
+  // Filter bar
+  html+='<div class="card" style="padding:14px 18px;margin-bottom:16px">';
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:10px;align-items:end">';
+  html+='<div><div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:4px">Data início</div>';
+  html+='<input type="date" value="'+rf.dt1+'" onchange="G.rf.dt1=this.value;re()" class="notransform" style="text-transform:none;width:100%"></div>';
+  html+='<div><div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:4px">Data fim</div>';
+  html+='<input type="date" value="'+rf.dt2+'" onchange="G.rf.dt2=this.value;re()" class="notransform" style="text-transform:none;width:100%"></div>';
+  html+='<div><div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:4px">Cliente</div>';
+  html+='<input value="'+rf.cli+'" oninput="G.rf.cli=this.value;re()" placeholder="Nome do cliente..." style="width:100%"></div>';
+  html+='<div><div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:4px">Veículo</div>';
+  html+='<input value="'+rf.veh+'" oninput="G.rf.veh=this.value;re()" placeholder="Marca ou modelo..." style="width:100%"></div>';
+  html+='<button class="btn bs bsm" onclick="resetRL()">✕ Limpar</button>';
+  html+='</div></div>';
+  // KPIs
+  html+='<div class="mts" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">';
+  html+='<div class="mt bl"><div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:4px">Resultados</div><div style="font-size:22px;font-weight:700">'+filtered.length+'</div><div style="font-size:10px;color:var(--tx3)">termos</div></div>';
+  html+='<div class="mt re"><div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:4px">Volume</div><div style="font-size:20px;font-weight:700">R$ '+vol.toLocaleString('pt-BR',{minimumFractionDigits:0})+'</div><div style="font-size:10px;color:var(--tx3)">aprovados</div></div>';
+  html+='<div class="mt gr"><div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:4px">Aprovados</div><div style="font-size:22px;font-weight:700">'+ap.length+'</div></div>';
+  html+='<div class="mt go"><div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:4px">Pendentes</div><div style="font-size:22px;font-weight:700">'+pe.length+'</div></div>';
+  html+='</div>';
+  // Table
+  html+='<div class="card" style="padding:0;overflow:hidden">';
+  if(filtered.length===0){
+    html+='<div style="text-align:center;padding:40px;color:var(--tx3)">Nenhum termo encontrado.</div>';
+  } else {
+    html+='<div style="overflow-x:auto"><table><thead><tr><th>ID</th><th>Data</th><th>Cliente</th><th>Telefone</th><th>Veículo</th><th>Valor</th><th>Tipo</th><th>Status</th>';
+    if(u.r!=='seller') html+='<th>Vendedor</th>';
+    html+='</tr></thead><tbody>';
+    for(var i=0;i<filtered.length;i++){
+      var t=filtered[i];
+      var sv=t.sv&&t.sv[0]?t.sv[0]:{};
+      var vnd=G.U.find(function(x){return x.id===t.cr;});
+      html+='<tr class="cr" data-id="'+t.id+'" onclick="go(\'dt\',this.dataset.id)">';
+      html+='<td><code>'+t.id+'</code></td>';
+      html+='<td style="font-size:12px;white-space:nowrap">'+t.dt+'</td>';
+      html+='<td style="font-weight:600">'+t.by+'</td>';
+      html+='<td style="font-size:12px;color:var(--tx2)">'+t.ph+'</td>';
+      html+='<td style="font-size:12px">'+(sv.m||'—')+'</td>';
+      html+='<td style="font-size:12px;color:#e8431e;font-weight:600">R$ '+(sv.pr||'—')+'</td>';
+      html+='<td><span style="font-size:10px;background:var(--bg3);padding:2px 7px;border-radius:4px;white-space:nowrap">'+(t.tp||'VENDA FINAL')+'</span></td>';
+      html+='<td>'+sbdg(t.st)+'</td>';
+      if(u.r!=='seller') html+='<td style="font-size:12px;color:var(--tx2)">'+(vnd?vnd.n.split(' ')[0]:'—')+'</td>';
+      html+='</tr>';
+    }
+    html+='</tbody></table></div>';
+  }
+  html+='</div>';
+  return html;
 }
 
 function bDB(){
@@ -682,7 +814,8 @@ function bS2(f){
   for(var i=0;i<f.tv.length;i++){
     var v=f.tv[i];
     html+='<div class="vc"><div class="vch"><span style="color:var(--blue)">🔄 Troca '+(i+1)+(f.tv.length>1?' de '+f.tv.length:'')+'</span><button class="btn bno bxs" data-idx="'+i+'" onclick="G.nf.tv.splice(parseInt(this.dataset.idx),1);re()">✕ Remover</button></div><div class="g2">';
-    html+='<div class="fl full"><label>Modelo / Marca</label><input value="'+v.m+'" data-field="m" data-idx="'+i+'" oninput="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value.toUpperCase()" placeholder="VEÍCULO DE TROCA"></div>';
+    html+='<div class="fl"><label>Marca</label><input value="'+v.mk+'" data-field="mk" data-idx="'+i+'" oninput="var idx=parseInt(this.dataset.idx);G.nf.tv[idx][this.dataset.field]=this.value.toUpperCase();G.nf.tv[idx].m=G.nf.tv[idx].mk+(G.nf.tv[idx].mo?\' / \'+G.nf.tv[idx].mo:\'\');" placeholder="EX: HONDA"></div>';
+    html+='<div class="fl"><label>Modelo</label><input value="'+v.mo+'" data-field="mo" data-idx="'+i+'" oninput="var idx=parseInt(this.dataset.idx);G.nf.tv[idx][this.dataset.field]=this.value.toUpperCase();G.nf.tv[idx].m=G.nf.tv[idx].mk+(G.nf.tv[idx].mo?\' / \'+G.nf.tv[idx].mo:\'\');" placeholder="EX: HRV EXL"></div>';
     html+=mFld('Valor de Entrada','nf.tv.'+i+'.v',v.v,false);
     html+='<div class="fl"><label>Cor</label><input value="'+v.c+'" data-field="c" data-idx="'+i+'" oninput="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value.toUpperCase()"></div>';
     html+='<div class="fl"><label>Km</label><input value="'+v.km+'" data-field="km" data-idx="'+i+'" oninput="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value.toUpperCase()"></div>';
