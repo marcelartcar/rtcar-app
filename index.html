@@ -235,13 +235,7 @@ function migrate(T){
 // Salva localmente SEMPRE (rápido) e envia ao Sheets (assíncrono)
 function saveData(){
   migrate(G.T);
-  // Write to localStorage as backup
-  try{
-    localStorage.setItem('rtcar_T',JSON.stringify(G.T));
-    localStorage.setItem('rtcar_U',JSON.stringify(G.U));
-    localStorage.setItem('rtcar_N',JSON.stringify(G.N));
-  }catch(e){ console.warn('localStorage error',e); }
-  // Write to Sheets (only after initial load to avoid overwriting)
+  // Sheets ONLY - no localStorage
   if(!GS_URL) return;
   if(!GS_LOADED) return;
   if(GS_SAVING) return;
@@ -254,28 +248,13 @@ function saveData(){
 
 // Carrega do Sheets; se falhar usa localStorage
 function loadData(){
-  // ONLY load from Sheets - localStorage is NOT used as data source
-  // This prevents stale local data from overwriting Sheets data
+  // Sheets ONLY - no localStorage reads ever
   if(!GS_URL){ GS_LOADED=true; re(); return; }
   showSyncStatus('↻ Sincronizando...', '#1e4d8c');
   fetch(GS_URL+'?t='+Date.now())
   .then(function(r){ return r.json(); })
   .then(function(d){
-    if(!d.ok){ 
-      // Sheets error - use localStorage as fallback only
-      try{
-        var t=localStorage.getItem('rtcar_T');
-        var u=localStorage.getItem('rtcar_U');
-        var n=localStorage.getItem('rtcar_N');
-        if(t) G.T=migrate(JSON.parse(t));
-        if(u){ var lu=JSON.parse(u); if(lu&&lu.length>0) G.U=lu; }
-        if(n) G.N=JSON.parse(n);
-      }catch(e){}
-      GS_LOADED=true;
-      showSyncStatus('⚠ Erro Sheets','#e8431e');
-      re(); return;
-    }
-    // Sheets is authoritative - always use its data
+    if(!d.ok){ GS_LOADED=true; showSyncStatus('⚠ Erro Sheets','#e8431e'); re(); return; }
     if(d.T!==undefined) G.T=migrate(d.T);
     if(d.U && d.U.length>0) G.U=d.U;
     if(d.N!==undefined) G.N=d.N;
@@ -285,18 +264,9 @@ function loadData(){
     re();
   })
   .catch(function(e){
-    // Network error - use localStorage as fallback
-    try{
-      var t=localStorage.getItem('rtcar_T');
-      var u=localStorage.getItem('rtcar_U');
-      var n=localStorage.getItem('rtcar_N');
-      if(t) G.T=migrate(JSON.parse(t));
-      if(u){ var lu=JSON.parse(u); if(lu&&lu.length>0) G.U=lu; }
-      if(n) G.N=JSON.parse(n);
-    }catch(ex){}
     GS_LOADED=true;
-    showSyncStatus('⚠ Offline — dados locais','#b8860b');
-    setTimeout(function(){ showSyncStatus('',''); },3000);
+    showSyncStatus('⚠ Sem conexão — tente recarregar','#b8860b');
+    setTimeout(function(){ showSyncStatus('',''); },5000);
     re();
   });
 }
@@ -1197,6 +1167,8 @@ function bi(){
   }
 }
 loadData();
+// Clear stale localStorage data - Sheets is the only source of truth
+try{ localStorage.clear(); }catch(e){}
 // Mostra tela de login imediatamente, depois carrega dados
 re();
 loadData();
