@@ -225,6 +225,7 @@ var G = {
 var APP_VERSION = 'v1.0.5 (02/05/2026)';
 var GS_URL = 'https://script.google.com/macros/s/AKfycbwonFJodV8_H-eofj7Q10qFLkbKk-aEAhSNIlZwPvXWtlBjddnIz31lZUZLhmnPnhjp/exec';
 var GS_SAVING = false;
+var GS_LOADED = false; // prevents save before first Sheets load
 
 function migrate(T){
   T.forEach(function(tm){ if(!tm.tp) tm.tp='VENDA FINAL'; });
@@ -240,6 +241,7 @@ function saveData(){
     localStorage.setItem('rtcar_N',JSON.stringify(G.N));
   }catch(e){ console.warn('localStorage error',e); }
   if(!GS_URL) return;
+  if(!GS_LOADED) return; // don't overwrite Sheets before initial load
   if(GS_SAVING) return;
   GS_SAVING=true;
   fetch(GS_URL,{method:'POST',body:JSON.stringify({action:'saveAll',T:G.T,U:G.U,N:G.N})})
@@ -271,12 +273,14 @@ function loadData(){
     if(d.T!==undefined){ G.T=migrate(d.T); localStorage.setItem('rtcar_T',JSON.stringify(G.T)); }
     if(d.U && d.U.length>0){ G.U=d.U; localStorage.setItem('rtcar_U',JSON.stringify(G.U)); }
     if(d.N!==undefined){ G.N=d.N; localStorage.setItem('rtcar_N',JSON.stringify(G.N)); }
+    GS_LOADED = true; // now safe to save back to Sheets
     showSyncStatus('✓ Sincronizado', '#1a6b3c');
     setTimeout(function(){ showSyncStatus('',''); },2000);
     re(); // sempre re-renderiza após receber dados do Sheets
   })
   .catch(function(e){
     console.warn('Sheets offline:',e);
+    GS_LOADED = true; // allow saves even offline
     showSyncStatus('⚠ Offline — dados locais','#b8860b');
     setTimeout(function(){ showSyncStatus('',''); },3000);
     re();
