@@ -267,14 +267,13 @@ function loadData(){
   .then(function(r){ return r.json(); })
   .then(function(d){
     if(!d.ok){ showSyncStatus('⚠ Erro Sheets','#e8431e'); re(); return; }
-    var changed=false;
-    // Sheets SEMPRE sobrescreve — mesmo que local tenha mais dados
-    if(d.T!==undefined){ G.T=migrate(d.T); localStorage.setItem('rtcar_T',JSON.stringify(G.T)); changed=true; }
-    if(d.U && d.U.length>0){ G.U=d.U; localStorage.setItem('rtcar_U',JSON.stringify(G.U)); changed=true; }
-    if(d.N!==undefined){ G.N=d.N; localStorage.setItem('rtcar_N',JSON.stringify(G.N)); changed=true; }
+    // Sheets SEMPRE sobrescreve — dados do servidor têm prioridade absoluta
+    if(d.T!==undefined){ G.T=migrate(d.T); localStorage.setItem('rtcar_T',JSON.stringify(G.T)); }
+    if(d.U && d.U.length>0){ G.U=d.U; localStorage.setItem('rtcar_U',JSON.stringify(G.U)); }
+    if(d.N!==undefined){ G.N=d.N; localStorage.setItem('rtcar_N',JSON.stringify(G.N)); }
     showSyncStatus('✓ Sincronizado', '#1a6b3c');
     setTimeout(function(){ showSyncStatus('',''); },2000);
-    if(changed) re();
+    re(); // sempre re-renderiza após receber dados do Sheets
   })
   .catch(function(e){
     console.warn('Sheets offline:',e);
@@ -1180,8 +1179,9 @@ function bi(){
   }
 }
 loadData();
-loadData();
+// Mostra tela de login imediatamente, depois carrega dados
 re();
+loadData();
 // Auto-refresh a cada 60 segundos
 setInterval(function(){ if(G.u && !G.nf) loadData(); }, 60000);
 // Request notification permission
