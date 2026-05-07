@@ -235,13 +235,15 @@ function migrate(T){
 // Salva localmente SEMPRE (rápido) e envia ao Sheets (assíncrono)
 function saveData(){
   migrate(G.T);
+  // Write to localStorage as backup
   try{
     localStorage.setItem('rtcar_T',JSON.stringify(G.T));
     localStorage.setItem('rtcar_U',JSON.stringify(G.U));
     localStorage.setItem('rtcar_N',JSON.stringify(G.N));
   }catch(e){ console.warn('localStorage error',e); }
+  // Write to Sheets (only after initial load to avoid overwriting)
   if(!GS_URL) return;
-  if(!GS_LOADED) return; // don't overwrite Sheets before initial load
+  if(!GS_LOADED) return;
   if(GS_SAVING) return;
   GS_SAVING=true;
   fetch(GS_URL,{method:'POST',body:JSON.stringify({action:'saveAll',T:G.T,U:G.U,N:G.N})})
@@ -252,35 +254,47 @@ function saveData(){
 
 // Carrega do Sheets; se falhar usa localStorage
 function loadData(){
-  // 1. Sempre carrega localStorage primeiro (instantâneo)
-  try{
-    var t=localStorage.getItem('rtcar_T');
-    var u=localStorage.getItem('rtcar_U');
-    var n=localStorage.getItem('rtcar_N');
-    if(t) G.T=migrate(JSON.parse(t));
-    if(u){ var lu=JSON.parse(u); if(lu&&lu.length>0) G.U=lu; }
-    if(n) G.N=JSON.parse(n);
-  }catch(e){ console.warn('localStorage load error', e); }
-
-  // 2. Sheets tem PRIORIDADE ABSOLUTA — sempre busca e sobrescreve
-  if(!GS_URL){ re(); return; }
+  // ONLY load from Sheets - localStorage is NOT used as data source
+  // This prevents stale local data from overwriting Sheets data
+  if(!GS_URL){ GS_LOADED=true; re(); return; }
   showSyncStatus('↻ Sincronizando...', '#1e4d8c');
   fetch(GS_URL+'?t='+Date.now())
   .then(function(r){ return r.json(); })
   .then(function(d){
-    if(!d.ok){ showSyncStatus('⚠ Erro Sheets','#e8431e'); re(); return; }
-    // Sheets SEMPRE sobrescreve — dados do servidor têm prioridade absoluta
-    if(d.T!==undefined){ G.T=migrate(d.T); localStorage.setItem('rtcar_T',JSON.stringify(G.T)); }
-    if(d.U && d.U.length>0){ G.U=d.U; localStorage.setItem('rtcar_U',JSON.stringify(G.U)); }
-    if(d.N!==undefined){ G.N=d.N; localStorage.setItem('rtcar_N',JSON.stringify(G.N)); }
-    GS_LOADED = true; // now safe to save back to Sheets
-    showSyncStatus('✓ Sincronizado', '#1a6b3c');
+    if(!d.ok){ 
+      // Sheets error - use localStorage as fallback only
+      try{
+        var t=localStorage.getItem('rtcar_T');
+        var u=localStorage.getItem('rtcar_U');
+        var n=localStorage.getItem('rtcar_N');
+        if(t) G.T=migrate(JSON.parse(t));
+        if(u){ var lu=JSON.parse(u); if(lu&&lu.length>0) G.U=lu; }
+        if(n) G.N=JSON.parse(n);
+      }catch(e){}
+      GS_LOADED=true;
+      showSyncStatus('⚠ Erro Sheets','#e8431e');
+      re(); return;
+    }
+    // Sheets is authoritative - always use its data
+    if(d.T!==undefined) G.T=migrate(d.T);
+    if(d.U && d.U.length>0) G.U=d.U;
+    if(d.N!==undefined) G.N=d.N;
+    GS_LOADED=true;
+    showSyncStatus('✓ Sincronizado','#1a6b3c');
     setTimeout(function(){ showSyncStatus('',''); },2000);
-    re(); // sempre re-renderiza após receber dados do Sheets
+    re();
   })
   .catch(function(e){
-    console.warn('Sheets offline:',e);
-    GS_LOADED = true; // allow saves even offline
+    // Network error - use localStorage as fallback
+    try{
+      var t=localStorage.getItem('rtcar_T');
+      var u=localStorage.getItem('rtcar_U');
+      var n=localStorage.getItem('rtcar_N');
+      if(t) G.T=migrate(JSON.parse(t));
+      if(u){ var lu=JSON.parse(u); if(lu&&lu.length>0) G.U=lu; }
+      if(n) G.N=JSON.parse(n);
+    }catch(ex){}
+    GS_LOADED=true;
     showSyncStatus('⚠ Offline — dados locais','#b8860b');
     setTimeout(function(){ showSyncStatus('',''); },3000);
     re();
