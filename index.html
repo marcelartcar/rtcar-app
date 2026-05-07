@@ -12,7 +12,7 @@
 body{font-family:var(--f);background:var(--bg);color:var(--tx);font-size:14px;line-height:1.5;height:100vh;overflow:hidden}
 .app{display:flex;height:100vh;overflow:hidden}
 .sb{width:220px;background:#fff;border-right:1px solid var(--bdr);display:flex;flex-direction:column;flex-shrink:0}
-.sb-logo{padding:16px 18px 14px;border-bottom:1px solid var(--bdr)}
+.sb-logo{padding:16px 18px 14px;border-bottom:1px solid var(--bdr)}.sb-ham{display:none}
 .sb-logo img{width:90px;object-fit:contain}
 .nav{flex:1;padding:10px 0;overflow-y:auto}
 .ni{display:flex;align-items:center;gap:9px;padding:10px 18px;cursor:pointer;color:var(--tx2);font-size:13px;border-left:3px solid transparent;transition:all .12s}
@@ -108,7 +108,41 @@ hr.dv{border:none;border-top:1px solid var(--bdr);margin:18px 0}
 .lc{width:100%;max-width:340px}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}
+
+@media(max-width:768px){
+  .sb{width:100%;height:52px;border-right:none;border-bottom:1px solid var(--bdr);
+      flex-direction:row;align-items:center;position:fixed;top:0;left:0;right:0;z-index:100}
+  .sb-logo{padding:0 12px;border-bottom:none}
+  .sb-logo img{width:56px}
+  .nav{display:none;flex-direction:column;position:fixed;top:52px;left:0;right:0;
+       background:var(--bg);z-index:99;border-bottom:2px solid var(--bdr);
+       padding:6px 0;box-shadow:0 6px 20px rgba(0,0,0,.12)}
+  .nav.mopen{display:flex}
+  .ni{padding:13px 20px;font-size:14px;border-left:none;border-bottom:1px solid var(--bdr)}
+  .ni.on{background:var(--redl);color:var(--red);border-left:3px solid var(--red)}
+  .sb-foot{margin-left:auto;padding:0 12px}
+  .sb-foot>div:first-child{display:none}
+  .sb-ham{display:flex!important;align-items:center;justify-content:center;
+          width:42px;height:52px;cursor:pointer;font-size:20px;color:var(--tx);
+          background:none;border:none;padding:0;flex-shrink:0}
+  .main{padding-top:96px}
+  .tb{position:fixed;top:52px;left:0;right:0;z-index:98;padding:0 14px;height:44px}
+  .cnt{padding:14px}
+  .card{padding:14px}
+  .mts{grid-template-columns:1fr 1fr!important}
+  .mt{padding:10px 12px}
+  .g2{grid-template-columns:1fr!important}
+  table{font-size:11px}
+  th,td{padding:6px 5px}
+}
 </style>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RT Car">
+<meta name="theme-color" content="#e8431e">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
 </head>
 <body>
 <div id="R" style="position:relative;height:100vh"></div>
@@ -139,7 +173,7 @@ function sbdg(s){
   return '<span class="bdg '+r[0]+'">'+r[1]+'</span>';
 }
 function eSV(){ return {m:'',mk:'',mo:'',yf:'',ym:'',c:'',km:'',pl:'',pr:'',ip:'comprador',tr:'comprador'}; }
-function eTV(){ return {m:'',mk:'',mo:'',yf:'',ym:'',c:'',km:'',pl:'',v:'',fi:'',av:'',bk:'',po:'',ip:'comprador',cr:'nao',obs:''}; }
+function eTV(){ return {m:'',mk:'',mo:'',yf:'',ym:'',c:'',km:'',pl:'',v:'',fi:'',av:'',bk:'',po:'',ip:'comprador',cr:'',ca:'',obs:''}; }
 
 function onMoney(el, path){
   var raw = el.value.replace(/\D/g,'');
@@ -149,6 +183,8 @@ function onMoney(el, path){
   el.value = fmt;
   setPath(path, fmt);
 }
+function fmtM(s){ return parseFloat((s||'0').replace(/\./g,'').replace(',','.'))||0; }
+function fmtBRL(n){ return n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function onDate(el, path){
   var raw = el.value.replace(/\D/g,'').substring(0,8);
   var fmt = raw;
@@ -173,30 +209,20 @@ var G = {
   U:[
     {id:1,n:'Marcela Admin',e:'marcela@rtcar.com.br',p:'RTCar@2025!',r:'master'},
     {id:2,n:'Rafael Gonçalves',e:'rafael@rtcar.com.br',p:'Rafael@2025!',r:'manager'},
-    {id:3,n:'Carlos Vendas',e:'carlos@rtcar.com.br',p:'Carlos@123',r:'seller'}
+    {id:3,n:'Carlos Vendas',e:'carlos@rtcar.com.br',p:'Carlos@123',r:'seller'},
+    {id:1777558385917,n:'JANDERSON REIS',e:'janderson@rtcar.com.br',p:'1234',r:'seller'},
+    {id:1777558402068,n:'ANDERSON PRUNER',e:'anderson@rtcar.com.br',p:'1234',r:'seller'},
+    {id:1777558425565,n:'GUILHERME FLECK',e:'guilhermefleck@rtcar.com.br',p:'1234',r:'seller'},
+    {id:1777558458882,n:'MARCO A CAETANO',e:'marcocaetano@rtcar.com.br',p:'1234',r:'seller'},
+    {id:1777567209542,n:'MAICON MESKE',e:'maicon.meske@rtcar.com.br',p:'1234',r:'seller'}
   ],
-  T:[
-    {id:'TRM-001',dt:'10/04/2025',og:'Passantes',by:'JOÃO DA SILVA',ph:'(47) 99888-7766',
-     sv:[{m:'HONDA CIVIC EXL',yf:'2022',ym:'2023',c:'PRATA',km:'32.000 KM',pl:'ABC-1234',pr:'112.000,00',ip:'comprador',tr:'rtcar'}],
-     tv:[],
-     py:{formas:['Financiamento'],obs:'FINANCIAMENTO BRADESCO 60X',vo:'25.000,00',hf:true,fb:'BRADESCO',fv:'87.000,00',fp:'60',fpv:'1.950,00',ft:'1,2%',fvc:'05/06/2025'},
-     st:'approved',cr:3,ab:2,at:'11/04/2025 09:15',locked:true,
-     lg:[{a:'Criado e enviado para aprovação',u:'Carlos Vendas',t:'10/04/2025 14:22'},{a:'Aprovado por Rafael Gonçalves',u:'Rafael Gonçalves',t:'11/04/2025 09:15'}]},
-    {id:'TRM-002',dt:'15/04/2025',og:'Instagram',by:'MARIA FERNANDA COSTA',ph:'(47) 98765-4321',
-     sv:[{m:'TOYOTA COROLLA XEI',yf:'2023',ym:'2023',c:'BRANCO',km:'12.500 KM',pl:'XYZ-5678',pr:'145.000,00',ip:'rtcar',tr:'comprador'}],
-     tv:[{m:'FIAT ARGO DRIVE',yf:'2020',ym:'2020',c:'VERMELHO',km:'58.000 KM',pl:'DEF-9012',v:'55.000,00',fi:'62.000,00',av:'55.000,00',bk:'ITAÚ',po:'8.500,00',ip:'comprador',cr:'sim',obs:'PEQUENO AMASSADO NO PARA-CHOQUE TRASEIRO'}],
-     py:{formas:['Dinheiro','Financiamento'],obs:'ENTRADA DINHEIRO + FINANCIAMENTO ITAÚ',vo:'',hf:false,fb:'',fv:'',fp:'',fpv:'',ft:'',fvc:''},
-     st:'pending',cr:3,ab:null,at:null,locked:false,
-     lg:[{a:'Criado e enviado para aprovação',u:'Carlos Vendas',t:'15/04/2025 10:45'}]}
-  ],
-  N:[
-    {id:1,msg:'🚗 Novo Termo TRM-002 aguardando aprovação — Maria Fernanda Costa',t:'15/04 10:45',r:false,tid:'TRM-002'},
-    {id:2,msg:'✅ Termo TRM-001 aprovado.',t:'11/04 09:15',r:true,tid:'TRM-001'}
-  ],
-  nf:null, ns:0, rf:{dt1:'',dt2:'',cli:'',veh:''}, auO:false, auF:{n:'',e:'',p:'',r:'seller'}
+  T:[],
+  N:[],
+  nf:null, ns:0, rf:{dt1:'',dt2:'',cli:'',veh:''}, mo2:false, auO:false, auF:{n:'',e:'',p:'',r:'seller'}
 };
 
 // ── Persistência Google Sheets + localStorage (fallback) ────
+var APP_VERSION = 'v1.0.5 (02/05/2026)';
 var GS_URL = 'https://script.google.com/macros/s/AKfycbwonFJodV8_H-eofj7Q10qFLkbKk-aEAhSNIlZwPvXWtlBjddnIz31lZUZLhmnPnhjp/exec';
 var GS_SAVING = false;
 
@@ -207,69 +233,54 @@ function migrate(T){
 
 // Salva localmente SEMPRE (rápido) e envia ao Sheets (assíncrono)
 function saveData(){
+  migrate(G.T);
   try{
-    migrate(G.T);
-    localStorage.setItem('rtcar_T', JSON.stringify(G.T));
-    localStorage.setItem('rtcar_U', JSON.stringify(G.U));
-    localStorage.setItem('rtcar_N', JSON.stringify(G.N));
-  }catch(e){ console.warn('localStorage error', e); }
-
+    localStorage.setItem('rtcar_T',JSON.stringify(G.T));
+    localStorage.setItem('rtcar_U',JSON.stringify(G.U));
+    localStorage.setItem('rtcar_N',JSON.stringify(G.N));
+  }catch(e){ console.warn('localStorage error',e); }
   if(!GS_URL) return;
-  if(GS_SAVING) return; // evita flood
-  GS_SAVING = true;
-  fetch(GS_URL, {
-    method: 'POST',
-    body: JSON.stringify({action:'saveAll', T:G.T, U:G.U, N:G.N})
-  })
+  if(GS_SAVING) return;
+  GS_SAVING=true;
+  fetch(GS_URL,{method:'POST',body:JSON.stringify({action:'saveAll',T:G.T,U:G.U,N:G.N})})
   .then(function(r){ return r.json(); })
-  .then(function(d){
-    GS_SAVING = false;
-    if(d.ok) showSyncStatus('✓ Salvo na nuvem', '#1a6b3c');
-    else showSyncStatus('⚠ Erro ao salvar: '+d.error, '#e8431e');
-  })
-  .catch(function(e){
-    GS_SAVING = false;
-    showSyncStatus('⚠ Sem conexão — salvo localmente', '#b8860b');
-  });
+  .then(function(d){ GS_SAVING=false; if(d.ok) showSyncStatus('✓ Salvo','#1a6b3c'); else showSyncStatus('⚠ Erro: '+d.error,'#e8431e'); })
+  .catch(function(){ GS_SAVING=false; showSyncStatus('⚠ Sem conexão','#b8860b'); });
 }
 
 // Carrega do Sheets; se falhar usa localStorage
 function loadData(){
-  // Sempre carrega local primeiro (instantâneo)
+  // 1. Sempre carrega localStorage primeiro (instantâneo)
   try{
     var t=localStorage.getItem('rtcar_T');
     var u=localStorage.getItem('rtcar_U');
     var n=localStorage.getItem('rtcar_N');
     if(t) G.T=migrate(JSON.parse(t));
-    if(u) G.U=JSON.parse(u);
+    if(u){ var lu=JSON.parse(u); if(lu&&lu.length>0) G.U=lu; }
     if(n) G.N=JSON.parse(n);
   }catch(e){ console.warn('localStorage load error', e); }
 
-  // Depois tenta carregar do Sheets (mais atualizado)
-  if(!GS_URL) return;
+  // 2. Sheets tem PRIORIDADE ABSOLUTA — sempre busca e sobrescreve
+  if(!GS_URL){ re(); return; }
   showSyncStatus('↻ Sincronizando...', '#1e4d8c');
   fetch(GS_URL+'?t='+Date.now())
   .then(function(r){ return r.json(); })
   .then(function(d){
-    if(!d.ok) { showSyncStatus('', ''); return; }
-    if(d.T && d.T.length > 0){
-      G.T = migrate(d.T);
-      localStorage.setItem('rtcar_T', JSON.stringify(G.T));
-    }
-    if(d.U && d.U.length > 0){
-      G.U = d.U;
-      localStorage.setItem('rtcar_U', JSON.stringify(G.U));
-    }
-    if(d.N && d.N.length > 0){
-      G.N = d.N;
-      localStorage.setItem('rtcar_N', JSON.stringify(G.N));
-    }
-    showSyncStatus('✓ Dados sincronizados', '#1a6b3c');
-    setTimeout(function(){ showSyncStatus('',''); re(); }, 1500);
+    if(!d.ok){ showSyncStatus('⚠ Erro Sheets','#e8431e'); re(); return; }
+    var changed=false;
+    // Sheets SEMPRE sobrescreve — mesmo que local tenha mais dados
+    if(d.T!==undefined){ G.T=migrate(d.T); localStorage.setItem('rtcar_T',JSON.stringify(G.T)); changed=true; }
+    if(d.U && d.U.length>0){ G.U=d.U; localStorage.setItem('rtcar_U',JSON.stringify(G.U)); changed=true; }
+    if(d.N!==undefined){ G.N=d.N; localStorage.setItem('rtcar_N',JSON.stringify(G.N)); changed=true; }
+    showSyncStatus('✓ Sincronizado', '#1a6b3c');
+    setTimeout(function(){ showSyncStatus('',''); },2000);
+    if(changed) re();
   })
-  .catch(function(){
-    showSyncStatus('⚠ Offline — usando dados locais', '#b8860b');
-    setTimeout(function(){ showSyncStatus('',''); }, 3000);
+  .catch(function(e){
+    console.warn('Sheets offline:',e);
+    showSyncStatus('⚠ Offline — dados locais','#b8860b');
+    setTimeout(function(){ showSyncStatus('',''); },3000);
+    re();
   });
 }
 
@@ -288,7 +299,7 @@ function cM(){ return G.u && G.u.r==='master'; }
 function isR(){ return G.u && (G.u.id===2||G.u.r==='admin'); }
 function unr(){ return G.N.filter(function(n){return !n.r;}).length; }
 
-function re(){ saveData(); $('R').innerHTML = bA(); bi(); }
+function re(){ $('R').innerHTML = bA(); bi(); }
 function go(p,id){ G.pg=p; if(id!==undefined) G.sid=id; G.no=false; G.pid=null; re(); }
 
 function bA(){
@@ -317,7 +328,7 @@ function bLg(){
     var u = G.U[i];
     html += '<div style="margin-bottom:4px;cursor:pointer;color:var(--tx2)" onclick="quickL(\'+u.e+\',\'+u.p+\')">▸ '+u.e+' ('+RL[u.r]+')</div>';
   }
-  html += '</div></div></div></div>';
+  html += '</div></div></div><div style="text-align:center;font-size:11px;color:rgba(255,255,255,.4);margin-top:20px;padding-bottom:16px">'+APP_VERSION+'</div></div>';
   return html;
 }
 function quickL(e,p){ $('lem').value=e; $('lpw').value=p; dL(); }
@@ -326,7 +337,7 @@ function dL(){
   var u=G.U.find(function(u){return u.e===e&&u.p===p;});
   if(!u){ $('le').textContent='E-mail ou senha incorretos.'; $('le').style.display='block'; return; }
   if(u.disabled){ $('le').textContent='Usuário inativo. Contate o administrador.'; $('le').style.display='block'; return; }
-  G.u=u; go('db');
+  G.u=u; if(u.firstLogin){ G.changePw=true; go('pr'); } else go('db');
 }
 
 function bSB(){
@@ -335,16 +346,16 @@ function bSB(){
   if(cC()) ns.push({id:'nv',i:'+',l:'Nova Venda'});
   if(u.r==='admin'||u.r==='master') ns.push({id:'us',i:'◉',l:'Usuários'});
   ns.push({id:'pr',i:'⊙',l:'Meu Perfil'});
-  var html = '<div class="sb"><div class="sb-logo"><img src="'+LOGO+'" style="width:90px;object-fit:contain;background:#1a1814;border-radius:6px;padding:6px 10px"></div><nav class="nav">';
+  var mo2=G.mo2||false; var html = '<div class="sb"><button class="sb-ham" onclick="G.mo2=!G.mo2;re()">'+(mo2?'&#x2715;':'&#9776;')+'</button><div class="sb-logo"><img src="'+LOGO+'" style="width:90px;object-fit:contain;background:#1a1814;border-radius:6px;padding:6px 10px"></div><nav class="nav'+(mo2?' mopen':'')+'">'; 
   for(var i=0;i<ns.length;i++){
     var n=ns[i];
-    html += '<div class="ni'+(G.pg===n.id?' on':'')+'" data-nid="'+n.id+'" onclick="go(this.dataset.nid)"><span style="font-size:14px;width:18px;text-align:center">'+n.i+'</span>'+n.l+'</div>';
+    html += '<div class="ni'+(G.pg===n.id?' on':'')+'" data-nid="'+n.id+'" onclick="G.mo2=false;go(this.dataset.nid)"><span style="font-size:14px;width:18px;text-align:center">'+n.i+'</span>'+n.l+'</div>';
   }
   html += '</nav><div class="sb-foot"><div style="display:flex;align-items:center;gap:9px">';
   html += '<div class="av" style="background:'+(RC[u.r]||'#888')+'">'+ini(u.n)+'</div>';
   html += '<div style="min-width:0;flex:1"><div style="font-size:12px;color:var(--tx);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+u.n.split(' ').slice(0,2).join(' ')+'</div><div style="font-size:10px;color:var(--tx3)">'+RL[u.r]+'</div></div>';
   html += '<button style="background:none;border:none;color:var(--tx3);cursor:pointer;font-size:15px" onclick="G.u=null;re()" title="Sair">⏻</button>';
-  html += '</div></div></div>';
+  html += '</div><div style="font-size:9px;color:var(--tx3);text-align:center;padding:6px 0;border-top:1px solid var(--bdr);margin-top:4px;letter-spacing:.3px">'+APP_VERSION+'</div></div></div>';
   return html;
 }
 
@@ -441,157 +452,126 @@ function bRL(){
 }
 
 function bDB(){
-  // Sellers see only their own mini-dashboard
   if(G.u.r==='seller'){
     var myT=G.T.filter(function(x){return x.cr===G.u.id;});
     var myAp=myT.filter(function(x){return x.st==='approved';});
     var myPe=myT.filter(function(x){return x.st==='pending';});
-    function fmtV2(s){return parseFloat((s||'0').replace(/\./g,'').replace(',','.'))||0;}
-    var myVol=myAp.reduce(function(s,x){return s+x.sv.reduce(function(a,v){return a+fmtV2(v.pr);},0);},0);
+    var myVol=myAp.reduce(function(s,x){return s+x.sv.reduce(function(a,v){return a+fmtM(v.pr);},0);},0);
     var html='<div style="font-family:var(--s);font-size:19px;margin-bottom:18px">Meu Desempenho</div>';
     html+='<div class="mts" style="grid-template-columns:repeat(3,1fr);margin-bottom:18px">';
-    html+='<div class="mt re"><div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px">Meu Volume</div><div style="font-size:22px;font-weight:700">R$ '+myVol.toLocaleString('pt-BR',{minimumFractionDigits:0})+'</div><div style="font-size:10px;color:var(--tx3);margin-top:3px">Termos aprovados</div></div>';
-    html+='<div class="mt gr"><div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px">Aprovados</div><div style="font-size:22px;font-weight:700">'+myAp.length+'</div><div style="font-size:10px;color:var(--tx3);margin-top:3px">de '+myT.length+' termos</div></div>';
-    html+='<div class="mt go"><div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px">Pendentes</div><div style="font-size:22px;font-weight:700">'+myPe.length+'</div><div style="font-size:10px;color:var(--tx3);margin-top:3px">Aguardando aprovação</div></div>';
+    html+='<div class="mt re"><div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:5px">Meu Volume</div><div style="font-size:20px;font-weight:700">R$ '+myVol.toLocaleString('pt-BR',{minimumFractionDigits:0})+'</div><div style="font-size:10px;color:var(--tx3)">Aprovados</div></div>';
+    html+='<div class="mt gr"><div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:5px">Aprovados</div><div style="font-size:22px;font-weight:700">'+myAp.length+'</div><div style="font-size:10px;color:var(--tx3)">de '+myT.length+' termos</div></div>';
+    html+='<div class="mt go"><div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:5px">Pendentes</div><div style="font-size:22px;font-weight:700">'+myPe.length+'</div></div>';
     html+='</div>';
-    if(myT.length===0){
-      html+='<div class="card" style="text-align:center;padding:40px;color:var(--tx3)">Você ainda não possui termos lançados.</div>';
-    } else {
-      html+='<div class="card"><div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px">Meus Termos Recentes</div>';
-      html+='<div style="overflow-x:auto"><table><thead><tr><th>ID</th><th>Comprador</th><th>Valor</th><th>Status</th></tr></thead><tbody>';
-      for(var i=0;i<Math.min(myT.length,8);i++){
-        var x=myT[i];
-        html+='<tr class="cr" data-id="'+x.id+'" onclick="go(\'dt\',this.dataset.id)"><td><code>'+x.id+'</code></td><td style="font-weight:500">'+x.by+'</td><td style="font-size:12px">R$ '+(x.sv&&x.sv[0]?x.sv[0].pr:'—')+'</td><td>'+sbdg(x.st)+'</td></tr>';
-      }
-      html+='</tbody></table></div></div>';
+    if(myT.length===0){ html+='<div class="card" style="text-align:center;padding:40px;color:var(--tx3)">Nenhum termo lançado ainda.</div>'; return html; }
+    html+='<div class="card"><div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:14px">Meus Termos Recentes</div>';
+    html+='<div style="overflow-x:auto"><table><thead><tr><th>ID</th><th>Comprador</th><th>Valor</th><th>Status</th></tr></thead><tbody>';
+    for(var i=0;i<Math.min(myT.length,8);i++){
+      var x=myT[i];
+      html+='<tr class="cr" data-id="'+x.id+'" onclick="go(\'dt\',this.dataset.id)"><td><code>'+x.id+'</code></td><td style="font-weight:500">'+x.by+'</td><td style="font-size:12px">R$ '+(x.sv&&x.sv[0]?x.sv[0].pr:'—')+'</td><td>'+sbdg(x.st)+'</td></tr>';
     }
+    html+='</tbody></table></div></div>';
     return html;
   }
+
+  // ── Master/Manager/Admin full dashboard ──
   var T=G.T;
   var ap=T.filter(function(x){return x.st==='approved';});
   var pe=T.filter(function(x){return x.st==='pending';});
   var re_=T.filter(function(x){return x.st==='rejected';});
-  var tot=T.length;
-
-  // Volume: sum ALL vehicles across all approved terms
-  function fmtV(str){ return parseFloat((str||'0').replace(/\./g,'').replace(',','.'))||0; }
-  var volTotal=ap.reduce(function(s,x){
-    var sv=x.sv.reduce(function(a,v){return a+fmtV(v.pr);},0);
-    return s+sv;
-  },0);
+  var volTotal=ap.reduce(function(s,x){return s+x.sv.reduce(function(a,v){return a+fmtM(v.pr);},0);},0);
   var volMes=ap.filter(function(x){
-    var d=new Date(); var m=d.getMonth()+1, y=d.getFullYear();
-    return x.dt && x.dt.indexOf(('0'+m).slice(-2)+'/'+y)>-1;
-  }).reduce(function(s,x){return s+x.sv.reduce(function(a,v){return a+fmtV(v.pr);},0);},0);
-  var tkMedio=ap.length?volTotal/ap.length:0;
+    var d=new Date(); var m=('0'+(d.getMonth()+1)).slice(-2), y=String(d.getFullYear()).slice(-2);
+    return x.dt&&x.dt.indexOf('/'+m+'/'+y)>-1||x.dt&&x.dt.indexOf('/'+m+'/20'+y)>-1;
+  }).reduce(function(s,x){return s+x.sv.reduce(function(a,v){return a+fmtM(v.pr);},0);},0);
 
-  // Origins breakdown
-  var ogMap={};
-  T.forEach(function(x){ogMap[x.og]=(ogMap[x.og]||0)+1;});
-  var ogArr=Object.keys(ogMap).map(function(k){return{k:k,v:ogMap[k]};}).sort(function(a,b){return b.v-a.v;}).slice(0,5);
-
-  // Sellers breakdown
-  var selMap={};
-  T.forEach(function(x){
-    var u=G.U.find(function(u){return u.id===x.cr;});
-    var nm=u?u.n:('ID '+x.cr);
-    selMap[nm]=(selMap[nm]||0)+1;
-  });
-  var selArr=Object.keys(selMap).map(function(k){return{k:k,v:selMap[k]};}).sort(function(a,b){return b.v-a.v;});
-
-  function fmtBRL(v){
-    return 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
-  }
-  function bar(val,max,color){
-    var pct=max?Math.round(val/max*100):0;
-    return '<div style="flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+color+';border-radius:3px;transition:width .4s"></div></div>';
-  }
+  function bar(val,max,color){ var pct=max?Math.round(val/max*100):0; return '<div style="flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+color+';border-radius:3px"></div></div>'; }
 
   var html='';
+  if(pe.length>0) html+='<div class="al aw" style="margin-bottom:18px"><span>⚠</span><div><strong>'+pe.length+' termo(s) aguardando aprovação.</strong></div><button class="btn bs bsm" style="margin-left:auto;flex-shrink:0" onclick="go(\'tl\')">Ver →</button></div>';
 
-  // Pending alert
-  if(cA()&&pe.length>0)
-    html+='<div class="al aw" style="margin-bottom:18px"><span>⚠</span><div><strong>'+pe.length+' termo(s) aguardando aprovação.</strong></div><button class="btn bs bsm" style="margin-left:auto;flex-shrink:0" onclick="go(\'tl\')">Ver →</button></div>';
-
-  // ── KPI cards row 1
+  // KPI row
   html+='<div class="mts" style="grid-template-columns:repeat(4,1fr);margin-bottom:18px">';
-  var kpis=[
-    ['Volume Total',fmtBRL(volTotal),'Termos aprovados','💰','re'],
-    ['Volume Mês',fmtBRL(volMes),'Mês corrente','📅','bl'],
-    ['Ticket Médio',fmtBRL(tkMedio),'Por venda aprovada','📊','gr'],
-    ['Taxa Aprovação',(tot?Math.round(ap.length/tot*100):0)+'%',ap.length+' de '+tot+' termos','✓','go'],
-  ];
-  kpis.forEach(function(m){
-    html+='<div class="mt '+m[4]+'"><div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px">'+m[0]+'</div><div style="font-size:22px;font-weight:700;line-height:1.1">'+m[1]+'</div><div style="font-size:10px;color:var(--tx3);margin-top:3px">'+m[2]+'</div><div style="position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:26px;opacity:.08">'+m[3]+'</div></div>';
-  });
+  html+='<div class="mt re"><div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:5px">Volume Total</div><div style="font-size:18px;font-weight:700">R$ '+volTotal.toLocaleString('pt-BR',{minimumFractionDigits:0})+'</div><div style="font-size:10px;color:var(--tx3)">Termos aprovados</div></div>';
+  html+='<div class="mt bl"><div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:5px">Volume Mês</div><div style="font-size:18px;font-weight:700">R$ '+volMes.toLocaleString('pt-BR',{minimumFractionDigits:0})+'</div><div style="font-size:10px;color:var(--tx3)">Mês corrente</div></div>';
+  html+='<div class="mt gr"><div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:5px">Aprovados</div><div style="font-size:22px;font-weight:700">'+ap.length+'</div><div style="font-size:10px;color:var(--tx3)">de '+T.length+' termos</div></div>';
+  html+='<div class="mt go"><div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:5px">Pendentes</div><div style="font-size:22px;font-weight:700">'+pe.length+'</div><div style="font-size:10px;color:var(--tx3)">Aguardando</div></div>';
   html+='</div>';
 
-  // ── KPI cards row 2
-  html+='<div class="mts" style="grid-template-columns:repeat(4,1fr);margin-bottom:18px">';
-  var kpis2=[
-    ['Total Termos',tot,'Todos os períodos','📋','bl'],
-    ['Aprovados',ap.length,'','✅','gr'],
-    ['Pendentes',pe.length,'Aguardando','⏳','go'],
-    ['Recusados',re_.length,'','❌','re'],
-  ];
-  kpis2.forEach(function(m){
-    html+='<div class="mt '+m[4]+'"><div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px">'+m[0]+'</div><div style="font-size:22px;font-weight:700">'+m[1]+'</div><div style="font-size:10px;color:var(--tx3);margin-top:3px">'+m[2]+'</div><div style="position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:26px;opacity:.08">'+m[3]+'</div></div>';
-  });
-  html+='</div>';
-
-  // ── 3-column grid: Recentes | Origens | Vendedores
+  // ── Row 2: Recentes | Origens | Vendedores ──
   html+='<div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:18px;margin-bottom:18px">';
 
-  // Recent terms
-  html+='<div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px">Termos Recentes</div><button class="btn bg bsm" onclick="go(\'tl\')">Ver todos →</button></div>';
-  if(T.length===0){
-    html+='<div style="text-align:center;padding:24px;color:var(--tx3)">Nenhum termo ainda</div>';
-  } else {
-    html+='<div style="overflow-x:auto"><table><thead><tr><th>ID</th><th>Comprador</th><th>Valor</th><th>Status</th></tr></thead><tbody>';
+  // Recentes
+  html+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase">Termos Recentes</div><button class="btn bg bsm" onclick="go(\'tl\')">Ver todos →</button></div>';
+  if(T.length===0){ html+='<div style="text-align:center;padding:20px;color:var(--tx3)">Nenhum termo</div>'; }
+  else {
+    html+='<table><thead><tr><th>ID</th><th>Comprador</th><th>Valor</th><th>Status</th></tr></thead><tbody>';
     for(var i=0;i<Math.min(T.length,6);i++){
       var x=T[i];
-      var vv=x.sv&&x.sv[0]?x.sv[0].pr:'—';
-      html+='<tr class="cr" data-id="'+x.id+'" onclick="go(\'dt\',this.dataset.id)"><td><code>'+x.id+'</code></td><td style="font-weight:500">'+x.by+'</td><td style="font-size:12px">R$ '+vv+'</td><td>'+sbdg(x.st)+'</td></tr>';
+      html+='<tr class="cr" data-id="'+x.id+'" onclick="go(\'dt\',this.dataset.id)"><td><code>'+x.id+'</code></td><td style="font-weight:500">'+x.by+'</td><td style="font-size:11px">R$ '+(x.sv&&x.sv[0]?x.sv[0].pr:'—')+'</td><td>'+sbdg(x.st)+'</td></tr>';
     }
-    html+='</tbody></table></div>';
+    html+='</tbody></table>';
   }
   html+='</div>';
 
-  // Origins
-  html+='<div class="card"><div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px">Top Origens</div>';
-  if(ogArr.length===0){
-    html+='<div style="text-align:center;padding:24px;color:var(--tx3);font-size:12px">Sem dados</div>';
-  } else {
-    var ogMax=ogArr[0].v;
-    ogArr.forEach(function(o){
-      html+='<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="font-weight:500;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+o.k+'</span><span style="font-weight:700;color:var(--red)">'+o.v+'</span></div>'+bar(o.v,ogMax,'var(--red)')+'</div>';
+  // Origens - TODAS
+  var ogMap={};
+  T.forEach(function(x){ogMap[x.og]=(ogMap[x.og]||0)+1;});
+  var ogArr=Object.keys(ogMap).map(function(k){return{k:k,v:ogMap[k]};}).sort(function(a,b){return b.v-a.v;});
+  html+='<div class="card"><div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:14px">Top Origens</div>';
+  if(ogArr.length===0){ html+='<div style="text-align:center;padding:20px;color:var(--tx3);font-size:12px">Sem dados</div>'; }
+  else { var ogMax=ogArr[0].v; ogArr.forEach(function(o){ html+='<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="font-weight:500">'+o.k+'</span><span style="font-weight:700;color:var(--red)">'+o.v+'</span></div>'+bar(o.v,ogMax,'var(--red)')+'</div>'; }); }
+  html+='</div>';
+
+  // Vendedores - TODOS
+  var selMap={};
+  T.forEach(function(x){var u=G.U.find(function(u){return u.id===x.cr;}); var nm=u?u.n.split(' ')[0]:('ID '+x.cr); selMap[nm]=(selMap[nm]||0)+1;});
+  var selArr=Object.keys(selMap).map(function(k){return{k:k,v:selMap[k]};}).sort(function(a,b){return b.v-a.v;});
+  html+='<div class="card"><div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:14px">Por Vendedor</div>';
+  if(selArr.length===0){ html+='<div style="text-align:center;padding:20px;color:var(--tx3);font-size:12px">Sem dados</div>'; }
+  else { var selMax=selArr[0].v; selArr.forEach(function(s){ html+='<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="font-weight:500">'+s.k+'</span><span style="font-weight:700;color:#1e4d8c">'+s.v+'</span></div>'+bar(s.v,selMax,'#1e4d8c')+'</div>'; }); }
+  html+='</div>';
+  html+='</div>';
+
+  // ── Row 3: Financiamento por banco + Cidades ──
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-bottom:18px">';
+
+  // Bancos financiamento
+  var finT=T.filter(function(x){return x.py&&x.py.hf&&x.py.fb;});
+  var bkMap={};
+  finT.forEach(function(x){ var b=(x.py.fb||'').toUpperCase(); bkMap[b]=(bkMap[b]||0)+1; });
+  var bkArr=Object.keys(bkMap).map(function(k){return{k:k,v:bkMap[k]};}).sort(function(a,b){return b.v-a.v;});
+  html+='<div class="card"><div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:14px">Financiamento por Banco</div>';
+  if(bkArr.length===0){ html+='<div style="text-align:center;padding:20px;color:var(--tx3);font-size:12px">Nenhum financiamento</div>'; }
+  else {
+    var bkTotal=finT.length;
+    bkArr.forEach(function(b){
+      var pct=Math.round(b.v/bkTotal*100);
+      html+='<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="font-weight:500">'+b.k+'</span><span style="font-weight:700;color:#1e4d8c">'+b.v+' ('+pct+'%)</span></div>'+bar(b.v,bkArr[0].v,'#1e4d8c')+'</div>';
     });
+    html+='<div style="font-size:10px;color:var(--tx3);margin-top:8px;border-top:1px solid var(--bdr);padding-top:8px">Total: '+bkTotal+' financiamentos</div>';
   }
   html+='</div>';
 
-  // Sellers
-  html+='<div class="card"><div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px">Por Vendedor</div>';
-  if(selArr.length===0){
-    html+='<div style="text-align:center;padding:24px;color:var(--tx3);font-size:12px">Sem dados</div>';
-  } else {
-    var selMax=selArr[0].v;
-    selArr.forEach(function(s){
-      html+='<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="font-weight:500;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+s.k.split(' ')[0]+'</span><span style="font-weight:700;color:#1e4d8c">'+s.v+'</span></div>'+bar(s.v,selMax,'#1e4d8c')+'</div>';
-    });
-  }
+  // Tabelas/taxas financiamento
+  var ftMap={};
+  finT.forEach(function(x){ var t=(x.py.ft||'—').toUpperCase(); ftMap[t]=(ftMap[t]||0)+1; });
+  var ftArr=Object.keys(ftMap).map(function(k){return{k:k,v:ftMap[k]};}).sort(function(a,b){return b.v-a.v;});
+  html+='<div class="card"><div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:14px">Tabelas / Taxas</div>';
+  if(ftArr.length===0){ html+='<div style="text-align:center;padding:20px;color:var(--tx3);font-size:12px">Nenhum financiamento</div>'; }
+  else { ftArr.forEach(function(t){ html+='<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="font-weight:500">'+t.k+'</span><span style="font-weight:700;color:#7c3aed">'+t.v+'</span></div>'+bar(t.v,ftArr[0].v,'#7c3aed')+'</div>'; }); }
   html+='</div>';
 
+  // Cidades: Brusque vs Fora
+  var cityBrusque=T.filter(function(x){return (x.city||'').toUpperCase().includes('BRUSQUE');}).length;
+  var cityFora=T.filter(function(x){return x.city&&!(x.city||'').toUpperCase().includes('BRUSQUE');}).length;
+  var citySemInfo=T.length-cityBrusque-cityFora;
+  html+='<div class="card"><div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:14px">Clientes por Cidade</div>';
+  html+='<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span style="font-weight:600">🏠 Brusque</span><span style="font-weight:700;color:#1a6b3c">'+cityBrusque+'</span></div>'+bar(cityBrusque,T.length,'#1a6b3c')+'</div>';
+  html+='<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span style="font-weight:600">✈ Fora</span><span style="font-weight:700;color:#1e4d8c">'+cityFora+'</span></div>'+bar(cityFora,T.length,'#1e4d8c')+'</div>';
+  if(citySemInfo>0) html+='<div style="font-size:11px;color:var(--tx3);margin-top:8px">'+citySemInfo+' sem cidade informada</div>';
   html+='</div>';
-
-  // ── Bottom: Status breakdown full width
-  html+='<div class="card"><div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px">Distribuição de Status</div>';
-  html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">';
-  var stRows=[['Aprovados',ap.length,'#1a6b3c'],['Pendentes',pe.length,'#b8860b'],['Recusados',re_.length,'#e8431e'],['Total',tot,'#1e4d8c']];
-  stRows.forEach(function(r){
-    var pct=tot?Math.round(r[1]/tot*100):0;
-    html+='<div style="text-align:center;padding:14px;background:var(--bg3);border-radius:var(--r)"><div style="font-size:22px;font-weight:700;color:'+r[2]+'">'+r[1]+'</div><div style="font-size:11px;color:var(--tx3);margin-top:2px">'+r[0]+'</div><div style="font-size:10px;color:'+r[2]+';font-weight:600;margin-top:4px">'+(r[0]==='Total'?'100%':pct+'%')+'</div></div>';
-  });
-  html+='</div></div>';
+  html+='</div>';
 
   return html;
 }
@@ -603,7 +583,8 @@ function bTL(){
     var q=sr.toLowerCase();
     return (!q||t.by.toLowerCase().includes(q)||t.id.toLowerCase().includes(q)||(t.sv[0]&&t.sv[0].m||'').toLowerCase().includes(q))&&
            (sf==='all'||t.st===sf)&&
-           (tab==='all'||(tab==='mine'&&t.cr===G.u.id)||(tab==='pending'&&t.st==='pending'));
+           (tab==='all'||(tab==='mine'&&t.cr===G.u.id)||(tab==='pending'&&t.st==='pending'))&&
+           (G.u.r==='master'||G.u.r==='manager'||G.u.r==='admin'||t.cr===G.u.id);
   });
   var html='<div style="display:flex;justify-content:flex-end;margin-bottom:16px">'+(cC()?'<button class="btn bp" onclick="go(\'nv\')">+ Nova Venda</button>':'')+'</div>';
   html+='<div class="tabs">';
@@ -652,7 +633,7 @@ function bDT(){
   html+=' <button class="btn bs bsm" data-id="'+t.id+'" onclick="G.pid=this.dataset.id;re()">👁 Visualizar</button>';
   if(!t.locked&&(t.cr===G.u.id||G.u.r==='admin')) html+=' <button class="btn bs bsm" data-id="'+t.id+'" onclick="startEdit(this.dataset.id)">✏ Editar</button>';
   if(cA()&&t.st==='pending') html+=' <button class="btn bok bsm" data-id="'+t.id+'" onclick="G.mo=this.dataset.id;re()">✓ Aprovar / Recusar</button>';
-  if(cM()) html+=' <button class="btn" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;font-size:12px;padding:5px 11px;border-radius:6px" data-id="'+t.id+'" onclick="if(confirm(\'Excluir este termo permanentemente?\')){{var idx=G.T.findIndex(function(x){return x.id===this.dataset.id;}.bind(this));if(idx>-1){G.T.splice(idx,1);go(\'tl\');}}}" >🗑 Excluir</button>';
+  if(cM()) html+=' <button class="btn" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;font-size:12px;padding:5px 11px;border-radius:6px" data-id="'+t.id+'" onclick="if(confirm(\'Excluir este termo permanentemente?\')){{var idx=G.T.findIndex(function(x){return x.id===this.dataset.id;}.bind(this));if(idx>-1){G.T.splice(idx,1);saveData();go(\'tl\');}}}" >🗑 Excluir</button>';
   html+='</div>';
   html+='<div style="display:grid;grid-template-columns:2fr 1fr;gap:18px"><div>';
   html+='<div class="card" style="margin-bottom:16px">';
@@ -731,6 +712,7 @@ function saveEdit(){
   updated.editMode=false; updated.editId=undefined;
   updated.lg=orig.lg.concat([{a:'Termo editado',u:G.u.n,t:ts()}]);
   G.T[idx]=updated;
+  saveData();
   G.nf=null; G.ns=0; go('dt',orig.id);
 }
 
@@ -763,7 +745,7 @@ function bNV(){
 }
 
 function iNF(){
-  G.nf={dt:td(),og:'',by:'',ph:'',tp:'VENDA FINAL',sv:[eSV()],tv:[],py:{formas:[],obs:'',vo:'',hf:false,fb:'',fv:'',fp:'',fpv:'',ft:'',fvc:''},dn:false,did:'',editMode:false,editId:null};
+  G.nf={dt:td(),og:'',by:'',ph:'',ph2:'',city:'',tp:'VENDA FINAL',sv:[eSV()],tv:[],py:{formas:[],obs:'',vo:'',hf:false,fb:'',fv:'',fp:'',fpv:'',ft:'',fvc:''},dn:false,did:'',editMode:false,editId:null};
   G.ns=0;
 }
 
@@ -780,6 +762,8 @@ function bS0(f){
   var TPVENDAS=['VENDA FINAL','VENDA REPASSE','VENDA SEM GARANTIA'];
   for(var tv=0;tv<TPVENDAS.length;tv++) html+='<option value="'+TPVENDAS[tv]+'"'+(f.tp===TPVENDAS[tv]?' selected':'')+'>'+TPVENDAS[tv]+'</option>';
   html+='</select></div>';
+  html+='<div class="fl"><label>Telefone 2 (opcional)</label><input value="'+(f.ph2||'')+'" oninput="if(G.nf){G.nf.ph2=this.value;var d=this.value.replace(/\\D/g,\'\');if(d.length===11)this.value=\'(\'+d.slice(0,2)+\') \'+d.slice(2,7)+\'-\'+d.slice(7);else if(d.length===10)this.value=\'(\'+d.slice(0,2)+\') \'+d.slice(2,6)+\'-\'+d.slice(6);}" placeholder="(47) 9XXXX-XXXX" class="notransform" style="text-transform:none"></div>';
+  html+='<div class="fl"><label>Cidade do Cliente</label><input value="'+(f.city||'')+'" oninput="if(G.nf)G.nf.city=this.value.toUpperCase()" placeholder="BRUSQUE - SC"></div>';
   html+='</div>';
   return html;
 }
@@ -826,7 +810,8 @@ function bS2(f){
     html+=mFld('Valor de Quitação Atual','nf.tv.'+i+'.bk',v.bk,false);
     html+=mFld('Avaliação','nf.tv.'+i+'.av',v.av,false);
     html+=mFld('Valor Fipe','nf.tv.'+i+'.po',v.po,false);
-        html+='<div class="fl"><label>Chave Reserva <span class="req">*</span></label><div class="rg"><label class="ro"><input type="radio" name="cr'+i+'" data-field="cr" data-idx="'+i+'" '+(v.cr==='sim'?'checked':'')+' onchange="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value" value="sim">✅ Sim</label><label class="ro"><input type="radio" name="cr'+i+'" data-field="cr" data-idx="'+i+'" '+(v.cr==='nao'?'checked':'')+' onchange="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value" value="nao">❌ Não</label></div></div>';
+        html+='<div class="fl"><label>Chave Reserva <span class="req">*</span></label><div class="rg"><label class="ro"><input type="radio" name="cr'+i+'" data-field="cr" data-idx="'+i+'" '+(v.cr==='sim'?'checked':'')+' onchange="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value" value="sim">✅ Sim</label><label class="ro"><input type="radio" name="cr'+i+'" data-field="cr" data-idx="'+i+'" '+(v.cr==='nao'?'checked':'')+' onchange="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value" value="nao">❌ Não</label><label class="ro"><input type="radio" name="cr'+i+'" data-field="cr" data-idx="'+i+'" '+(v.cr==='pendencia'?'checked':'')+' onchange="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value" value="pendencia">⚠ Pendência</label></div></div>';
+    html+='<div class="fl"><label>Consta na Avaliação? <span class="req">*</span></label><div class="rg"><label class="ro"><input type="radio" name="ca'+i+'" data-field="ca" data-idx="'+i+'" '+(v.ca==='sim'?'checked':'')+' onchange="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value" value="sim">✅ Sim</label><label class="ro"><input type="radio" name="ca'+i+'" data-field="ca" data-idx="'+i+'" '+(v.ca==='nao'?'checked':'')+' onchange="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value" value="nao">❌ Não</label></div></div>';
     html+='<div class="fl"><label>IPVA 2026</label><div class="rg"><label class="ro"><input type="radio" name="tvi'+i+'" data-field="ip" data-idx="'+i+'" '+(v.ip==='comprador'?'checked':'')+' onchange="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value" value="comprador">Comprador</label><label class="ro"><input type="radio" name="tvi'+i+'" data-field="ip" data-idx="'+i+'" '+(v.ip==='rtcar'?'checked':'')+' onchange="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value" value="rtcar">RT Car</label></div></div>';
     html+='<div class="fl full"><label>Observações do veículo</label><textarea data-field="obs" data-idx="'+i+'" oninput="G.nf.tv[parseInt(this.dataset.idx)][this.dataset.field]=this.value.toUpperCase()" placeholder="AMASSADOS, RISCOS, MECÂNICA...">'+(v.obs||'')+'</textarea></div>';
     html+='</div></div>';
@@ -838,18 +823,36 @@ function bS2(f){
 function bS3(f){
   var p=f.py;
   var html='<div style="font-family:var(--s);font-size:19px;margin-bottom:16px">Formas de Pagamento</div>';
-  html+=mFld('Valor da Volta / Pagamento (opcional)','nf.py.vo',p.vo,false);
+  // Cálculo automático: Venda - Entrada + Quitação
+  var _venda=(f.sv||[]).reduce(function(s,v){return s+fmtM(v.pr);},0);
+  var _entr =(f.tv||[]).reduce(function(s,v){return s+fmtM(v.v); },0);
+  var _quit =(f.tv||[]).reduce(function(s,v){return s+fmtM(v.bk);},0);
+  var _calc =_venda-_entr+_quit;
+  // Auto-fill vo if empty or user hasn't overridden
+  if(!p.vo||p.vo==='') { if(G.nf) G.nf.py.vo=((_calc>0)?fmtBRL(_calc):'0,00'); p.vo=G.nf.py.vo; }
+  html+='<div class="card" style="background:var(--bg3);border:1px solid var(--bdr);padding:14px 16px;margin-bottom:14px">';
+  html+='<div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Cálculo do Valor a Cobrar</div>';
+  html+='<div style="display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;align-items:center;gap:6px;font-size:13px">';
+  html+='<div style="text-align:center"><div style="font-size:10px;color:var(--tx3);margin-bottom:3px">VALOR DE VENDA</div><div style="font-weight:700;color:#1e4d8c">R$ '+fmtBRL(_venda)+'</div></div>';
+  html+='<div style="text-align:center;font-size:18px;color:var(--tx3)">−</div>';
+  html+='<div style="text-align:center"><div style="font-size:10px;color:var(--tx3);margin-bottom:3px">VALOR DE ENTRADA</div><div style="font-weight:700;color:#e8431e">R$ '+fmtBRL(_entr)+'</div></div>';
+  html+='<div style="text-align:center;font-size:18px;color:var(--tx3)">+</div>';
+  html+='<div style="text-align:center"><div style="font-size:10px;color:var(--tx3);margin-bottom:3px">VALOR QUITAÇÃO</div><div style="font-weight:700;color:#b8860b">R$ '+fmtBRL(_quit)+'</div></div>';
+  html+='<div style="text-align:center;font-size:18px;color:var(--tx3)">=</div>';
+  html+='<div style="text-align:center;background:#fff;border-radius:6px;padding:6px 8px;border:2px solid #1a6b3c"><div style="font-size:10px;color:var(--tx3);margin-bottom:3px">VALOR A COBRAR</div><div style="font-weight:700;font-size:16px;color:#1a6b3c">R$ '+fmtBRL(_calc)+'</div></div>';
+  html+='</div></div>';
+  html+=mFld('Valor da Volta / Pagamento','nf.py.vo',p.vo,false);
   html+='<div class="fl" style="margin-bottom:14px;margin-top:14px"><label>Formas utilizadas</label><div class="rg">';
   for(var i=0;i<FORMAS.length;i++){
     var fp=FORMAS[i], checked=(p.formas||[]).indexOf(fp)>-1;
     html+='<label class="ro" style="background:'+(checked?'var(--redl)':'var(--bg3)')+';border:1px solid '+(checked?'var(--red)':'var(--bdr)')+';border-radius:7px;padding:6px 11px;font-size:12px;font-weight:500;cursor:pointer"><input type="checkbox" data-forma="'+fp+'" '+(checked?'checked':'')+' onchange="toggleForma(this.dataset.forma)" style="accent-color:var(--red)"> '+fp+'</label>';
   }
   html+='</div></div>';
+  html+='<label style="display:flex;align-items:center;gap:9px;padding:10px 13px;background:var(--bg3);border-radius:var(--r);cursor:pointer;font-size:13px;font-weight:500;margin:14px 0"><input type="checkbox" '+(p.hf?'checked':'')+' onchange="if(G.nf)G.nf.py.hf=this.checked;re()" style="accent-color:var(--red);width:15px;height:15px"> Detalhar financiamento</label>';
   html+='<div class="fl" style="margin-bottom:14px"><label>Descreva a negociação / condições de pagamento <span class="req">*</span></label>';
   html+='<textarea oninput="if(G.nf)G.nf.py.obs=this.value.toUpperCase()" placeholder="EX: ENTRADA R$ 30.000 DINHEIRO + FINANCIAMENTO BRADESCO 48X..." style="min-height:80px">'+p.obs+'</textarea></div>';
   html+='<div class="fl" style="margin-bottom:14px;margin-top:12px"><label>Observações adicionais</label>';
   html+='<textarea oninput="if(G.nf)G.nf.py.obs2=this.value.toUpperCase()" placeholder="EX: CHAVE RESERVA ENTREGUE, REVISÃO AGENDADA..." style="min-height:64px">'+(p.obs2||'')+'</textarea></div>';
-  html+='<label style="display:flex;align-items:center;gap:9px;padding:10px 13px;background:var(--bg3);border-radius:var(--r);cursor:pointer;font-size:13px;font-weight:500;margin:14px 0"><input type="checkbox" '+(p.hf?'checked':'')+' onchange="if(G.nf)G.nf.py.hf=this.checked;re()" style="accent-color:var(--red);width:15px;height:15px"> Detalhar financiamento</label>';
   if(p.hf){
     html+='<div class="g2">';
     html+='<div class="fl"><label>Banco</label><input value="'+p.fb+'" oninput="if(G.nf)G.nf.py.fb=this.value.toUpperCase()" placeholder="BRADESCO, ITAÚ..."></div>';
@@ -884,6 +887,13 @@ function nS(){
       if(!v.m||!v.pr||!v.c||!v.km||!v.yf||!v.ym||!v.pl) return alert('Preencha todos os campos do Veículo '+(i+1)+'.');
     }
   }
+  if(s===2){
+    for(var i=0;i<f.tv.length;i++){
+      var v=f.tv[i];
+      if(!v.cr) return alert('Informe a situação da Chave Reserva do Veículo de Troca '+(i+1)+'.');
+      if(!v.ca) return alert('Informe se a Chave Reserva consta na avaliação do Veículo de Troca '+(i+1)+'.');
+    }
+  }
   if(s===3){
     if(!f.py.obs||!f.py.obs.trim()) return alert('Descreva as condições de pagamento.');
   }
@@ -897,7 +907,11 @@ function sT(){
   var novoTermo={id:id,dt:f.dt,og:f.og,by:f.by,ph:f.ph,tp:f.tp||'VENDA FINAL',sv:JSON.parse(JSON.stringify(f.sv)),tv:JSON.parse(JSON.stringify(f.tv)),py:JSON.parse(JSON.stringify(f.py)),st:'pending',cr:G.u.id,ab:null,at:null,locked:false,lg:[{a:'Criado e enviado para aprovação',u:G.u.n,t:ts()}]};
   G.T.unshift(novoTermo);
   G.N.unshift({id:Date.now(),msg:'🚗 Novo Termo '+id+' aguardando aprovação — '+f.by+' (por '+G.u.n+')',t:ts().slice(0,11),r:false,tid:id});
-  G.nf.dn=true; G.nf.did=id; re();
+  // Browser push notification for master/manager
+  if('Notification' in window && Notification.permission==='granted'){
+    new Notification('RT Car — Novo Termo',{body:'Termo '+id+' de '+f.by+' aguarda aprovação.',icon:'icon-192.png'});
+  }
+  G.nf.dn=true; G.nf.did=id; saveData(); re();
 }
 
 function bMo(){
@@ -950,7 +964,7 @@ function dD(id,st){
       G.N.unshift({id:Date.now()+G.U[i].id,msg:st==='approved'?'✅ Termo '+id+' APROVADO por '+G.u.n+' — '+t.by:'❌ Termo '+id+' recusado por '+G.u.n+' — '+t.by,t:ts().slice(0,11),r:false,tid:id});
     }
   }
-  G.mo=null; re();
+  saveData(); G.mo=null; re();
 }
 
 function bNP(){
@@ -1003,7 +1017,7 @@ function bPDFv(){
     html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:5px;text-align:right"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Valor de Entrada</div><div style="font-size:18px;font-weight:700;color:#e8431e">'+fmtR(v.v)+'</div></div>';
     html+='</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px 14px;margin-bottom:4px">';
     html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Placa</div><div style="font-size:13px;font-weight:500">'+v.pl+'</div></div>';
-    html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Chave Reserva</div><div style="font-size:13px;font-weight:500">'+(v.cr==='sim'?'Sim':'Não')+'</div></div>';
+    html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Chave Reserva</div><div style="font-size:13px;font-weight:500">'+(v.cr==='sim'?'Sim':v.cr==='pendencia'?'Pendência':'Não')+'</div></div>';
     html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Avaliação</div><div style="font-size:13px;font-weight:500">'+fmtR(v.av)+'</div></div>';
     html+='<div style="border-bottom:1px solid var(--bdr);padding-bottom:5px"><div style="font-size:10px;text-transform:uppercase;color:var(--tx3)">Fipe</div><div style="font-size:13px;font-weight:500">'+fmtR(v.po)+'</div></div>';
     html+='</div>';
@@ -1035,18 +1049,18 @@ function gerarPDF(id){
   if(!t){alert('Termo não encontrado');return;}
   var cr=G.U.find(function(u){return u.id===t.cr;});
   var jsPDF=window.jspdf.jsPDF;
-  var doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-  var W=210,M=14,y=0;
+  var doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true,putOnlyUsedFonts:true});
+  var W=210,M=11,y=0;
   function h2r(h){return[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}
   function sf(st,sz,col){doc.setFont('helvetica',st);doc.setFontSize(sz);var c=h2r(col||'#1a1814');doc.setTextColor(c[0],c[1],c[2]);}
   function fr(x,fy,w,h,col){var c=h2r(col);doc.setFillColor(c[0],c[1],c[2]);doc.rect(x,fy,w,h,'F');}
   function dl(x1,y1,x2,y2,col,lw){var c=h2r(col||'#e0e0e0');doc.setDrawColor(c[0],c[1],c[2]);doc.setLineWidth(lw||0.2);doc.line(x1,y1,x2,y2);}
   function fmtDt(d){ if(!d) return '—'; if(d.includes('-')){ var p=d.split('-'); return p[2]+'/'+p[1]+'/'+p[0].slice(-2); } var p=d.split('/'); return p.length===3?p[0]+'/'+p[1]+'/'+p[2].slice(-2):d; }
   function fmtPh(p){ if(!p) return '—'; var d=p.replace(/\D/g,''); if(d.length===11) return '('+d.slice(0,2)+') '+d.slice(2,7)+'-'+d.slice(7); if(d.length===10) return '('+d.slice(0,2)+') '+d.slice(2,6)+'-'+d.slice(6); return p; }
-  function campo(label,valor,x,fy,w){sf('bold',8,'#888888');doc.text(label,x,fy);sf('normal',10,'#1a1814');doc.text(String(valor||'—'),x,fy+4.5,{maxWidth:w-1});dl(x,fy+6.2,x+w,fy+6.2,'#e0e0e0',0.15);}
-  function campoDir(label,valor,x,fy,w){sf('bold',8,'#888888');doc.text(label,x+w,fy,{align:'right'});sf('bold',12,'#e8431e');doc.text(String(valor||'—'),x+w,fy+5,{align:'right'});dl(x,fy+6.5,x+w,fy+6.5,'#e0e0e0',0.15);}
-  function lc(campos,fy){for(var i=0;i<campos.length;i++){var c=campos[i];if(c.dir) campoDir(c.l,c.v,c.x,fy,c.w);else campo(c.l,c.v,c.x,fy,c.w);}return fy+12;}
-  function secao(titulo,cor){fr(M,y,W-M*2,7,'#e8e8e8');sf('bold',9,'#444444');doc.text(titulo,W/2,y+5,{align:'center'});y+=10;}
+  function campo(label,valor,x,fy,w){sf('bold',7,'#888888');doc.text(label,x,fy);sf('normal',9,'#1a1814');doc.text(String(valor||'—'),x,fy+4.5,{maxWidth:w-1});dl(x,fy+6.2,x+w,fy+6.2,'#e0e0e0',0.15);}
+  function campoDir(label,valor,x,fy,w){sf('bold',7,'#888888');doc.text(label,x+w,fy,{align:'right'});sf('bold',12,'#e8431e');doc.text(String(valor||'—'),x+w,fy+5,{align:'right'});dl(x,fy+6.5,x+w,fy+6.5,'#e0e0e0',0.15);}
+  function lc(campos,fy){for(var i=0;i<campos.length;i++){var c=campos[i];if(c.dir) campoDir(c.l,c.v,c.x,fy,c.w);else campo(c.l,c.v,c.x,fy,c.w);}return fy+10;}
+  function secao(titulo,cor){fr(M,y,W-M*2,7,'#e8e8e8');sf('bold',8,'#444444');doc.text(titulo,W/2,y+5,{align:'center'});y+=8;}
   // Header
   fr(0,0,W,28,'#e0e0e0');
   try{doc.addImage(LOGO,'PNG',M,3,0,22);}catch(e){}
@@ -1055,7 +1069,7 @@ function gerarPDF(id){
   y=34;
   var tw=W-M*2;
   secao('DADOS DO COMPRADOR','#1e4d8c');
-  y=lc([{l:'Comprador',v:t.by,x:M,w:tw/2-2},{l:'Telefone',v:fmtPh(t.ph),x:M+tw/2+2,w:tw/2-2}],y);y+=4;
+  y=2; y=lc([{l:'Comprador',v:t.by,x:M,w:tw/2-2},{l:'Telefone',v:fmtPh(t.ph),x:M+tw/2+2,w:tw/2-2}],y);y+=4;
   for(var i=0;i<t.sv.length;i++){
     var v=t.sv[i];
     secao('VEÍCULO VENDIDO'+(t.sv.length>1?' '+(i+1):''));
@@ -1068,7 +1082,7 @@ function gerarPDF(id){
     var v=t.tv[i];
     secao('VEÍCULO DE TROCA'+(t.tv.length>1?' '+(i+1):''),'#1e4d8c');
     y=lc([{l:'Modelo / Marca',v:v.m,x:M,w:tw*.40},{l:'Ano Fab./Mod.',v:v.yf+'/'+v.ym,x:M+tw*.42,w:tw*.16},{l:'Cor',v:v.c,x:M+tw*.60,w:tw*.16},{l:'Valor de Entrada',v:fmtR(v.v),x:M+tw*.78,w:tw*.22,dir:true}],y);
-    y=lc([{l:'Quilometragem',v:v.km,x:M,w:tw*.28},{l:'Placa',v:v.pl,x:M+tw*.30,w:tw*.22},{l:'Chave Reserva',v:v.cr==='sim'?'Sim':'Não',x:M+tw*.54,w:tw*.46}],y);
+    y=lc([{l:'Quilometragem',v:v.km,x:M,w:tw*.22},{l:'Placa',v:v.pl,x:M+tw*.24,w:tw*.18},{l:'Chave Reserva',v:v.cr==='sim'?'Sim':v.cr==='pendencia'?'Pendência':'Não',x:M+tw*.44,w:tw*.26},{l:'Consta Aval.',v:v.ca==='sim'?'Sim':'Não',x:M+tw*.72,w:tw*.28}],y);
     y=lc([{l:'Avaliação',v:fmtR(v.av),x:M,w:tw*.35},{l:'Valor Fipe',v:fmtR(v.po),x:M+tw*.37,w:tw*.63}],y);
     if(v.fi||v.bk) y=lc([{l:'Banco Alienação',v:v.fi||'—',x:M,w:tw*.45},{l:'Valor Quitação',v:fmtR(v.bk),x:M+tw*.47,w:tw*.53}],y);
     if(v.obs) y=lc([{l:'Observações',v:v.obs,x:M,w:tw}],y);
@@ -1078,8 +1092,8 @@ function gerarPDF(id){
   if(t.py.vo) y=lc([{l:'Valor da Volta / Pagamento',v:fmtR(t.py.vo),x:M+tw*.62,w:tw*.38,dir:true}],y);
   if(t.py.formas&&t.py.formas.length>0){sf('normal',9,'#1a1814');doc.text('Formas: '+t.py.formas.join(', '),M,y);y+=7;}
   if(t.py.obs){
-    sf('bold',8,'#888888');doc.text('NEGOCIAÇÃO / DETALHES',M,y);
-    sf('normal',10,'#1a1814');
+    sf('bold',7,'#888888');doc.text('NEGOCIAÇÃO / DETALHES',M,y);
+    sf('normal',9,'#1a1814');
     var obsLines=doc.splitTextToSize(t.py.obs,tw);
     for(var ol=0;ol<obsLines.length;ol++){doc.text(obsLines[ol],M,y+4.5+(ol*5.5));}
     dl(M,y+5.5+(obsLines.length*5.5),M+tw,y+5.5+(obsLines.length*5.5),'#e0e0e0',0.15);
@@ -1133,7 +1147,7 @@ function bUS(){
     html+='<td>'+(disabled?'<span style="font-size:11px;color:#e8431e;font-weight:600">Inativo</span>':'<span style="font-size:11px;color:#1a6b3c;font-weight:600">Ativo</span>')+'</td>';
     html+='<td style="white-space:nowrap">';
     if(canAct){
-      html+='<button class="btn bs bsm" style="margin-right:4px" data-uid="'+u.id+'" onclick="var uid=parseInt(this.dataset.uid);var ux=G.U.find(function(x){return x.id===uid;});if(ux){ux.disabled=!ux.disabled;}re()">'+(disabled?'✓ Ativar':'⊘ Inabilitar')+'</button>';
+      html+='<button class="btn bs bsm" style="margin-right:4px" data-uid="'+u.id+'" onclick="var uid=parseInt(this.dataset.uid);var ux=G.U.find(function(x){return x.id===uid;});if(ux){ux.disabled=!ux.disabled;saveData();}re()">'+(disabled?'✓ Ativar':'⊘ Inabilitar')+'</button>';
       html+='<button class="btn bsm" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5" data-uid="'+u.id+'" onclick="if(confirm(\'Excluir este usuário permanentemente?\')){{var uid=parseInt(this.dataset.uid);var idx=G.U.findIndex(function(x){return x.id===uid;});if(idx>-1){G.U.splice(idx,1);re();}}}">🗑</button>';
     } else if(isSelf) {
       html+='<span style="font-size:11px;color:var(--tx3)">Você</span>';
@@ -1147,8 +1161,8 @@ function aU(){
   var f=G.auF, e=$('aue');
   if(!f.n||!f.e||!f.p){e.textContent='Preencha todos os campos.';e.style.display='block';return;}
   if(G.U.find(function(u){return u.e===f.e;})){e.textContent='E-mail já cadastrado.';e.style.display='block';return;}
-  G.U.push({id:Date.now(),n:f.n,e:f.e,p:f.p,r:f.r});
-  G.auF={n:'',e:'',p:'',r:'seller'}; G.auO=false; re();
+  G.U.push({id:Date.now(),n:f.n,e:f.e,p:f.p,r:f.r,firstLogin:true});
+  G.auF={n:'',e:'',p:'',r:'seller'}; G.auO=false; saveData(); re();
 }
 
 function bPR(){
@@ -1168,6 +1182,180 @@ function bi(){
 loadData();
 loadData();
 re();
+// Auto-refresh a cada 60 segundos
+setInterval(function(){ if(G.u && !G.nf) loadData(); }, 60000);
+// Request notification permission
+if('Notification' in window && Notification.permission==='default') Notification.requestPermission();
+</script>
+
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js')
+      .then(function(r){ console.log('SW registered'); })
+      .catch(function(e){ console.log('SW error', e); });
+  });
+}
+</script>
+</body>
+</html
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>RT Car — Gestão de Vendas</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f5f5f5;--bg2:#ffffff;--bg3:#f0f0f0;--tx:#1a1814;--tx2:#4a4a4a;--tx3:#888;--red:#e8431e;--redl:#fff0ec;--gold:#b8860b;--goldl:#faf6e8;--green:#1a6b3c;--greenl:#e8f5ee;--blue:#1e4d8c;--bluel:#e8f0fb;--bdr:#e0e0e0;--r:10px;--r2:14px;--f:'DM Sans',sans-serif;--s:'DM Serif Display',serif}
+body{font-family:var(--f);background:var(--bg);color:var(--tx);font-size:14px;line-height:1.5;height:100vh;overflow:hidden}
+.app{display:flex;height:100vh;overflow:hidden}
+.sb{width:220px;background:#fff;border-right:1px solid var(--bdr);display:flex;flex-direction:column;flex-shrink:0}
+.sb-logo{padding:16px 18px 14px;border-bottom:1px solid var(--bdr)}.sb-ham{display:none}
+.sb-logo img{width:90px;object-fit:contain}
+.nav{flex:1;padding:10px 0;overflow-y:auto}
+.ni{display:flex;align-items:center;gap:9px;padding:10px 18px;cursor:pointer;color:var(--tx2);font-size:13px;border-left:3px solid transparent;transition:all .12s}
+.ni:hover{color:var(--red);background:#fff3f0}
+.ni.on{color:var(--red);background:#fff3f0;border-left-color:var(--red);font-weight:600}
+.sb-foot{padding:13px 16px;border-top:1px solid var(--bdr)}
+.av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.tb{background:#fff;border-bottom:1px solid var(--bdr);padding:0 22px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.cnt{flex:1;overflow-y:auto;padding:22px}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:var(--r);font-size:13px;font-weight:500;cursor:pointer;border:none;font-family:var(--f);transition:all .12s;line-height:1}
+.bp{background:var(--red);color:#fff}.bp:hover{background:#c73516}
+.bs{background:#fff;color:var(--tx);border:1px solid var(--bdr)}.bs:hover{background:var(--bg3)}
+.bg{background:none;color:var(--tx2);border:1px solid transparent}.bg:hover{background:var(--bg3)}
+.bok{background:var(--greenl);color:var(--green);border:1px solid rgba(26,107,60,.2)}.bok:hover{background:var(--green);color:#fff}
+.bno{background:var(--redl);color:var(--red);border:1px solid rgba(232,67,30,.2)}.bno:hover{background:var(--red);color:#fff}
+.bsm{padding:5px 11px;font-size:12px}
+.bxs{padding:2px 7px;font-size:11px}
+.nb{position:relative;background:#fff;border:1px solid var(--bdr);border-radius:var(--r);padding:6px 10px;cursor:pointer;font-size:14px;color:var(--tx2)}
+.ndot{position:absolute;top:3px;right:3px;width:7px;height:7px;background:var(--red);border-radius:50%;border:2px solid #fff;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.bdg{display:inline-flex;align-items:center;padding:3px 9px;border-radius:100px;font-size:11px;font-weight:600}
+.bpp{background:var(--goldl);color:var(--gold)}.baa{background:var(--greenl);color:var(--green)}.brr{background:var(--redl);color:var(--red)}.bdd{background:var(--bg3);color:var(--tx3)}
+.badm{background:#1a1814;color:#fff}.bmst{background:#7c3aed;color:#fff}.bman{background:var(--bluel);color:var(--blue)}.bsel{background:var(--bg3);color:var(--tx2)}
+.card{background:#fff;border:1px solid var(--bdr);border-radius:var(--r2);padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.mts{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:20px}
+.mt{background:#fff;border:1px solid var(--bdr);border-radius:var(--r2);padding:17px;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.mt::after{content:'';position:absolute;top:0;left:0;width:100%;height:3px}
+.mt.bl::after{background:var(--blue)}.mt.gr::after{background:var(--green)}.mt.go::after{background:var(--gold)}.mt.re::after{background:var(--red)}
+table{width:100%;border-collapse:collapse}
+th{font-size:10px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;padding:8px 12px;text-align:left;background:var(--bg3);border-bottom:1px solid var(--bdr)}
+td{padding:10px 12px;border-bottom:1px solid var(--bdr);font-size:13px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr.cr:hover td{background:#fff8f6;cursor:pointer}
+code{font-size:11px;background:var(--bg3);padding:2px 6px;border-radius:4px;font-family:monospace;color:var(--red)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px}
+.full{grid-column:1/-1}
+.fl{display:flex;flex-direction:column;gap:5px}
+.fl label{font-size:10px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.3px}
+.fl input,.fl select,.fl textarea{background:var(--bg);border:1px solid var(--bdr);border-radius:var(--r);padding:8px 11px;font-size:13px;font-family:var(--f);color:var(--tx);outline:none;transition:border-color .12s;text-transform:uppercase}
+.fl input::placeholder,.fl textarea::placeholder{text-transform:none;color:var(--tx3)}
+.fl input:focus,.fl select:focus,.fl textarea:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(232,67,30,.08);background:#fff}
+.fl input.er,.fl select.er{border-color:var(--red);background:#fff8f6}
+.fl textarea{resize:vertical;min-height:70px;text-transform:uppercase}
+.fl select{text-transform:none}
+.notransform{text-transform:none!important}
+.rg{display:flex;gap:10px;flex-wrap:wrap}
+.ro{display:flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;color:var(--tx2)}
+.ro input{accent-color:var(--red)}
+.req{color:var(--red);font-size:10px}
+hr.dv{border:none;border-top:1px solid var(--bdr);margin:18px 0}
+.al{border-radius:var(--r);padding:11px 14px;font-size:13px;margin-bottom:12px;display:flex;align-items:flex-start;gap:9px}
+.aw{background:#fffbeb;border:1px solid rgba(184,134,11,.25);color:#7a5a00}
+.ai{background:var(--bluel);border:1px solid rgba(30,77,140,.2);color:var(--blue)}
+.aok{background:var(--greenl);border:1px solid rgba(26,107,60,.2);color:var(--green)}
+.mwrap{position:relative}
+.mwrap .msym{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--tx3);pointer-events:none;font-weight:500;z-index:1}
+.mwrap input{padding-left:32px!important;text-transform:none!important}
+.np{position:absolute;right:0;top:0;width:330px;height:100%;background:#fff;border-left:1px solid var(--bdr);z-index:200;display:flex;flex-direction:column;box-shadow:-4px 0 20px rgba(0,0,0,.08)}
+.ov{position:absolute;inset:0;background:rgba(0,0,0,.4);z-index:150;display:flex;align-items:center;justify-content:center;padding:20px}
+.mod{background:#fff;border-radius:var(--r2);padding:26px;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.15)}
+.pov{position:absolute;inset:0;background:rgba(0,0,0,.6);z-index:300;overflow-y:auto;padding:16px;display:flex;justify-content:center;align-items:flex-start}
+.pfr{background:#fff;width:720px;max-width:100%;border-radius:8px;overflow:hidden}
+.sb2{background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--r);padding:14px;margin-bottom:13px}
+.sb2t{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--tx2);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.sb2t .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dg2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.df{display:flex;flex-direction:column;gap:2px}
+.dfl{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3);font-weight:600}
+.dfv{font-size:13px;font-weight:500;color:var(--tx)}
+.dfv.big{font-size:15px;font-weight:700;color:var(--red)}
+.price-r{text-align:right;font-size:15px;font-weight:700;color:var(--red)}
+.tabs{display:flex;border-bottom:1px solid var(--bdr);margin-bottom:18px}
+.tab{padding:9px 16px;font-size:13px;font-weight:500;cursor:pointer;color:var(--tx3);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .12s}
+.tab:hover{color:var(--tx)}.tab.on{color:var(--red);border-bottom-color:var(--red)}
+.steps{display:flex;align-items:center;margin-bottom:20px}
+.si{display:flex;align-items:center;flex:1}
+.sd{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.sdn{background:var(--green);color:#fff}.sac{background:var(--red);color:#fff}.std{background:var(--bg3);color:var(--tx3)}
+.sl{flex:1;height:1px;background:var(--bdr);margin:0 6px}.sldo{background:var(--green)}
+.vc{background:#fff;border:1px solid var(--bdr);border-radius:var(--r);padding:15px;margin-bottom:11px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.vch{font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:11px;display:flex;align-items:center;justify-content:space-between}
+.addbtn{display:flex;align-items:center;gap:6px;padding:9px 14px;border:1px dashed var(--bdr);border-radius:var(--r);cursor:pointer;font-size:13px;color:var(--tx2);background:none;font-family:var(--f);width:100%;margin-top:6px;transition:all .12s;justify-content:center}
+.addBtn:hover{border-color:var(--red);color:var(--red);background:var(--redl)}
+.tli{display:flex;gap:10px;padding-bottom:13px;position:relative}
+.tli:not(:last-child)::after{content:'';position:absolute;left:10px;top:21px;width:1px;height:calc(100% - 5px);background:var(--bdr)}
+.tld{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;z-index:1;flex-shrink:0}
+.lw{display:flex;min-height:100vh;width:100%}
+.ll{flex:1;background:#1a1814;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px}
+.lr{width:420px;display:flex;align-items:center;justify-content:center;padding:36px;background:var(--bg)}
+.lc{width:100%;max-width:340px}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}
+
+@media(max-width:768px){
+  .sb{width:100%;height:52px;border-right:none;border-bottom:1px solid var(--bdr);
+      flex-direction:row;align-items:center;position:fixed;top:0;left:0;right:0;z-index:100}
+  .sb-logo{padding:0 12px;border-bottom:none}
+  .sb-logo img{width:56px}
+  .nav{display:none;flex-direction:column;position:fixed;top:52px;left:0;right:0;
+       background:var(--bg);z-index:99;border-bottom:2px solid var(--bdr);
+       padding:6px 0;box-shadow:0 6px 20px rgba(0,0,0,.12)}
+  .nav.mopen{display:flex}
+  .ni{padding:13px 20px;font-size:14px;border-left:none;border-bottom:1px solid var(--bdr)}
+  .ni.on{background:var(--redl);color:var(--red);border-left:3px solid var(--red)}
+  .sb-foot{margin-left:auto;padding:0 12px}
+  .sb-foot>div:first-child{display:none}
+  .sb-ham{display:flex!important;align-items:center;justify-content:center;
+          width:42px;height:52px;cursor:pointer;font-size:20px;color:var(--tx);
+          background:none;border:none;padding:0;flex-shrink:0}
+  .main{padding-top:96px}
+  .tb{position:fixed;top:52px;left:0;right:0;z-index:98;padding:0 14px;height:44px}
+  .cnt{padding:14px}
+  .card{padding:14px}
+  .mts{grid-template-columns:1fr 1fr!important}
+  .mt{padding:10px 12px}
+  .g2{grid-template-columns:1fr!important}
+  table{font-size:11px}
+  th,td{padding:6px 5px}
+}
+</style>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RT Car">
+<meta name="theme-color" content="#e8431e">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+</head>
+<body>
+<div id="R" style="position:relative;height:100vh"></div>
+
+
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js')
+      .then(function(r){ console.log('SW registered'); })
+      .catch(function(e){ console.log('SW error', e); });
+  });
+}
 </script>
 </body>
 </html>
