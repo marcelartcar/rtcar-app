@@ -211,21 +211,22 @@ var G = {
     {id:2,n:'Rafael Gonçalves',e:'rafael@rtcar.com.br',p:'Rafael@2025!',r:'manager'},
     {id:3,n:'Carlos Vendas',e:'carlos@rtcar.com.br',p:'Carlos@123',r:'seller'},
     {id:1777558385917,n:'JANDERSON REIS',e:'janderson@rtcar.com.br',p:'1234',r:'seller'},
-    {id:1777558402068,n:'ANDERSON PRUNER',e:'anderson@rtcar.com.br',p:'1234',r:'seller'},
     {id:1777558425565,n:'GUILHERME FLECK',e:'guilhermefleck@rtcar.com.br',p:'1234',r:'seller'},
     {id:1777558458882,n:'MARCO A CAETANO',e:'marcocaetano@rtcar.com.br',p:'1234',r:'seller'},
-    {id:1777567209542,n:'MAICON MESKE',e:'maicon.meske@rtcar.com.br',p:'1234',r:'seller'}
+    {id:1777567209542,n:'MAICON MESKE',e:'maicon.meske@rtcar.com.br',p:'1234',r:'seller'},
+    {id:1777600000001,n:'DOCUMENTOS',e:'documentos@rtcar.com.br',p:'1234',r:'master'}
   ],
   T:[],
   N:[],
-  nf:null, ns:0, rf:{dt1:'',dt2:'',cli:'',veh:''}, mo2:false, auO:false, auF:{n:'',e:'',p:'',r:'seller'}
+  nf:null, ns:0, rf:{dt1:'',dt2:'',cli:'',veh:''}, mo2:false, DEL:[], dbPeriod:'mes', auO:false, auF:{n:'',e:'',p:'',r:'seller'}
 };
 
 // ── Persistência Google Sheets + localStorage (fallback) ────
-var APP_VERSION = 'v1.0.5 (02/05/2026)';
+var APP_VERSION = 'v1.1.0 (08/05/2026)';
 var GS_URL = 'https://script.google.com/macros/s/AKfycbwonFJodV8_H-eofj7Q10qFLkbKk-aEAhSNIlZwPvXWtlBjddnIz31lZUZLhmnPnhjp/exec';
 var GS_SAVING = false;
-var GS_LOADED = false; // prevents save before first Sheets load
+var GS_LOADED = false;
+var GS_DELETED = []; // track deleted term IDs // prevents save before first Sheets load
 
 function migrate(T){
   T.forEach(function(tm){ if(!tm.tp) tm.tp='VENDA FINAL'; });
@@ -233,17 +234,72 @@ function migrate(T){
 }
 
 // Salva localmente SEMPRE (rápido) e envia ao Sheets (assíncrono)
+function mergeBaseUsers(){
+  var BASE_U=[
+    {id:1,n:'Marcela Admin',e:'marcela@rtcar.com.br',p:'RTCar@2025!',r:'master'},
+    {id:2,n:'Rafael Gonçalves',e:'rafael@rtcar.com.br',p:'Rafael@2025!',r:'manager'},
+    {id:3,n:'Carlos Vendas',e:'carlos@rtcar.com.br',p:'Carlos@123',r:'seller'},
+    {id:1777558385917,n:'JANDERSON REIS',e:'janderson@rtcar.com.br',p:'1234',r:'seller'},
+    {id:1777558425565,n:'GUILHERME FLECK',e:'guilhermefleck@rtcar.com.br',p:'1234',r:'seller'},
+    {id:1777558458882,n:'MARCO A CAETANO',e:'marcocaetano@rtcar.com.br',p:'1234',r:'seller'},
+    {id:1777567209542,n:'MAICON MESKE',e:'maicon.meske@rtcar.com.br',p:'1234',r:'seller'},
+    {id:1777600000001,n:'DOCUMENTOS',e:'documentos@rtcar.com.br',p:'1234',r:'master'}
+  ];
+  BASE_U.forEach(function(bu){
+    if(!G.U.find(function(u){return u.id===bu.id;})) G.U.push(bu);
+  });
+}
+
 function saveData(){
   migrate(G.T);
-  // Sheets ONLY - no localStorage
-  if(!GS_URL) return;
-  if(!GS_LOADED) return;
-  if(GS_SAVING) return;
+  mergeBaseUsers();
+  if(!GS_URL||!GS_LOADED||GS_SAVING) return;
   GS_SAVING=true;
-  fetch(GS_URL,{method:'POST',body:JSON.stringify({action:'saveAll',T:G.T,U:G.U,N:G.N})})
+  // SAFE SAVE: fetch current Sheets data first, then merge and save
+  fetch(GS_URL+'?t='+Date.now())
   .then(function(r){ return r.json(); })
-  .then(function(d){ GS_SAVING=false; if(d.ok) showSyncStatus('✓ Salvo','#1a6b3c'); else showSyncStatus('⚠ Erro: '+d.error,'#e8431e'); })
-  .catch(function(){ GS_SAVING=false; showSyncStatus('⚠ Sem conexão','#b8860b'); });
+  .then(function(d){
+    if(d.ok){
+      // Merge: keep all Sheets terms + add/update local terms
+      var sheetsT = d.T||[];
+      var sheetsU = d.U||[];
+      // Local terms take priority (they're newer) but don't remove Sheets terms
+      var mergedT = sheetsT.slice(); // start with Sheets data
+      G.T.forEach(function(lt){
+        var idx = mergedT.findIndex(function(st){return st.id===lt.id;});
+        if(idx>=0) mergedT[idx]=lt; // update existing
+        else mergedT.unshift(lt); // add new
+      });
+      // Remove explicitly deleted terms
+      mergedT = mergedT.filter(function(t){
+        return G.DEL.indexOf(t.id)===-1;
+      });
+      // Filter out test data from 2025
+      mergedT = mergedT.filter(function(t){
+        return !(t.dt && t.dt.indexOf('2025')!==-1 && (t.by==='JOÃO DA SILVA'||t.by==='MARIA FERNANDA COSTA'));
+      });
+      // Merge users: keep Sheets users + base users
+      var mergedU = sheetsU.length>0 ? sheetsU : G.U;
+      mergeBaseUsers();
+      G.U.forEach(function(lu){
+        if(!mergedU.find(function(su){return su.id===lu.id;})) mergedU.push(lu);
+      });
+      G.T = migrate(mergedT);
+      G.U = mergedU;
+    }
+    // Now save merged data
+    fetch(GS_URL,{method:'POST',body:JSON.stringify({action:'saveAll',T:G.T,U:G.U,N:G.N,DEL:G.DEL})})
+    .then(function(r2){ return r2.json(); })
+    .then(function(d2){ GS_SAVING=false; if(d2.ok) showSyncStatus('✓ Salvo','#1a6b3c'); else showSyncStatus('⚠ Erro: '+d2.error,'#e8431e'); })
+    .catch(function(){ GS_SAVING=false; showSyncStatus('⚠ Sem conexão','#b8860b'); });
+  })
+  .catch(function(){
+    // If fetch fails, save what we have
+    fetch(GS_URL,{method:'POST',body:JSON.stringify({action:'saveAll',T:G.T,U:G.U,N:G.N,DEL:G.DEL})})
+    .then(function(r){ return r.json(); })
+    .then(function(d){ GS_SAVING=false; })
+    .catch(function(){ GS_SAVING=false; showSyncStatus('⚠ Sem conexão','#b8860b'); });
+  });
 }
 
 // Carrega do Sheets; se falhar usa localStorage
@@ -255,9 +311,16 @@ function loadData(){
   .then(function(r){ return r.json(); })
   .then(function(d){
     if(!d.ok){ GS_LOADED=true; showSyncStatus('⚠ Erro Sheets','#e8431e'); re(); return; }
-    if(d.T!==undefined) G.T=migrate(d.T);
-    if(d.U && d.U.length>0) G.U=d.U;
+    if(d.T!==undefined){ G.T=migrate(d.T); G.T=G.T.filter(function(t){return G.DEL.indexOf(t.id)===-1;}); }
+    if(d.U && d.U.length>0){
+      // Merge: keep Sheets users + add any hardcoded users not in Sheets
+      var sheetsU = d.U;
+      G.U = sheetsU;
+    } else {
+      // Sheets has no users - keep current G.U (hardcoded fallback)
+    }
     if(d.N!==undefined) G.N=d.N;
+    if(d.DEL&&d.DEL.length>0){ G.DEL=d.DEL; G.T=G.T.filter(function(t){return G.DEL.indexOf(t.id)===-1;}); }
     GS_LOADED=true;
     showSyncStatus('✓ Sincronizado','#1a6b3c');
     setTimeout(function(){ showSyncStatus('',''); },2000);
@@ -452,10 +515,18 @@ function bDB(){
     html+='</div>';
     if(myT.length===0){ html+='<div class="card" style="text-align:center;padding:40px;color:var(--tx3)">Nenhum termo lançado ainda.</div>'; return html; }
     html+='<div class="card"><div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:14px">Meus Termos Recentes</div>';
-    html+='<div style="overflow-x:auto"><table><thead><tr><th>ID</th><th>Comprador</th><th>Valor</th><th>Status</th></tr></thead><tbody>';
+    html+='<div style="overflow-x:auto"><table><thead><tr><th>ID</th><th>Data</th><th>Comprador</th><th>Veículo</th><th>Placa</th><th>Valor</th><th>Status</th></tr></thead><tbody>';
     for(var i=0;i<Math.min(myT.length,8);i++){
-      var x=myT[i];
-      html+='<tr class="cr" data-id="'+x.id+'" onclick="go(\'dt\',this.dataset.id)"><td><code>'+x.id+'</code></td><td style="font-weight:500">'+x.by+'</td><td style="font-size:12px">R$ '+(x.sv&&x.sv[0]?x.sv[0].pr:'—')+'</td><td>'+sbdg(x.st)+'</td></tr>';
+      var x=myT[i]; var xsv=x.sv&&x.sv[0]?x.sv[0]:{};
+      html+='<tr class="cr" data-id="'+x.id+'" onclick="go(\'dt\',this.dataset.id)">';
+      html+='<td><code>'+x.id+'</code></td>';
+      html+='<td style="font-size:11px;white-space:nowrap">'+x.dt+'</td>';
+      html+='<td style="font-weight:500">'+x.by+'</td>';
+      html+='<td style="font-size:11px">'+(xsv.m||'—')+'</td>';
+      html+='<td style="font-size:11px">'+(xsv.pl||'—')+'</td>';
+      html+='<td style="font-size:11px;color:#e8431e;font-weight:600">R$ '+(xsv.pr||'—')+'</td>';
+      html+='<td>'+sbdg(x.st)+'</td>';
+      html+='</tr>';
     }
     html+='</tbody></table></div></div>';
     return html;
@@ -477,45 +548,109 @@ function bDB(){
   var html='';
   if(pe.length>0) html+='<div class="al aw" style="margin-bottom:18px"><span>⚠</span><div><strong>'+pe.length+' termo(s) aguardando aprovação.</strong></div><button class="btn bs bsm" style="margin-left:auto;flex-shrink:0" onclick="go(\'tl\')">Ver →</button></div>';
 
+  // Ticket médio
+  var ticketMedio = ap.length>0 ? Math.round(volTotal/ap.length) : 0;
   // KPI row
   html+='<div class="mts" style="grid-template-columns:repeat(4,1fr);margin-bottom:18px">';
   html+='<div class="mt re"><div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:5px">Volume Total</div><div style="font-size:18px;font-weight:700">R$ '+volTotal.toLocaleString('pt-BR',{minimumFractionDigits:0})+'</div><div style="font-size:10px;color:var(--tx3)">Termos aprovados</div></div>';
   html+='<div class="mt bl"><div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:5px">Volume Mês</div><div style="font-size:18px;font-weight:700">R$ '+volMes.toLocaleString('pt-BR',{minimumFractionDigits:0})+'</div><div style="font-size:10px;color:var(--tx3)">Mês corrente</div></div>';
-  html+='<div class="mt gr"><div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:5px">Aprovados</div><div style="font-size:22px;font-weight:700">'+ap.length+'</div><div style="font-size:10px;color:var(--tx3)">de '+T.length+' termos</div></div>';
-  html+='<div class="mt go"><div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:5px">Pendentes</div><div style="font-size:22px;font-weight:700">'+pe.length+'</div><div style="font-size:10px;color:var(--tx3)">Aguardando</div></div>';
+  html+='<div class="mt gr"><div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:5px">Ticket Médio</div><div style="font-size:18px;font-weight:700">R$ '+ticketMedio.toLocaleString('pt-BR',{minimumFractionDigits:0})+'</div><div style="font-size:10px;color:var(--tx3)">Por venda aprovada</div></div>';
+  html+='<div class="mt go"><div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:5px">Pendentes</div><div style="font-size:22px;font-weight:700">'+pe.length+'</div><div style="font-size:10px;color:var(--tx3)">de '+T.length+' termos</div></div>';
   html+='</div>';
 
-  // ── Row 2: Recentes | Origens | Vendedores ──
+  // ── Row 2: Termos do Mês | Origens | Vendedores ──
   html+='<div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:18px;margin-bottom:18px">';
 
-  // Recentes
-  html+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase">Termos Recentes</div><button class="btn bg bsm" onclick="go(\'tl\')">Ver todos →</button></div>';
-  if(T.length===0){ html+='<div style="text-align:center;padding:20px;color:var(--tx3)">Nenhum termo</div>'; }
-  else {
-    html+='<table><thead><tr><th>ID</th><th>Comprador</th><th>Valor</th><th>Status</th></tr></thead><tbody>';
-    for(var i=0;i<Math.min(T.length,6);i++){
-      var x=T[i];
-      html+='<tr class="cr" data-id="'+x.id+'" onclick="go(\'dt\',this.dataset.id)"><td><code>'+x.id+'</code></td><td style="font-weight:500">'+x.by+'</td><td style="font-size:11px">R$ '+(x.sv&&x.sv[0]?x.sv[0].pr:'—')+'</td><td>'+sbdg(x.st)+'</td></tr>';
+  // Termos do Mês Atual
+  var now=new Date();
+  var mesAtual=('0'+(now.getMonth()+1)).slice(-2);
+  var anoAtual=String(now.getFullYear()).slice(-2);
+  var anoFull=String(now.getFullYear());
+  var mesNome=now.toLocaleString('pt-BR',{month:'long'});
+  var Tmes=T.filter(function(t){
+    if(!t.dt) return false;
+    var parts=t.dt.split('/');
+    if(parts.length<3) return false;
+    return parts[1]===mesAtual&&(parts[2]===anoAtual||parts[2]===anoFull);
+  });
+  html+='<div class="card">';
+  html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">';
+  html+='<div><div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase">Termos de '+mesNome.charAt(0).toUpperCase()+mesNome.slice(1)+'</div>';
+  html+='<div style="font-size:10px;color:var(--tx3);margin-top:2px">'+Tmes.length+' termo(s) no mês</div></div>';
+  html+='<button class="btn bg bsm" onclick="go(\'tl\')">Ver todos →</button></div>';
+  if(Tmes.length===0){
+    html+='<div style="text-align:center;padding:20px;color:var(--tx3);font-size:12px">Nenhum termo lançado este mês.</div>';
+  } else {
+    html+='<div style="overflow-x:auto"><table><thead><tr><th>ID</th><th>Data</th><th>Comprador</th><th>Veículo</th><th>Placa</th><th>Valor</th><th>Vendedor</th><th>Status</th></tr></thead><tbody>';
+    for(var i=0;i<Tmes.length;i++){
+      var x=Tmes[i];
+      var xsv=x.sv&&x.sv[0]?x.sv[0]:{};
+      var xvnd=G.U.find(function(u){return u.id===x.cr;})||{n:(x.lg&&x.lg[0]?x.lg[0].u:'—')};
+      html+='<tr class="cr" data-id="'+x.id+'" onclick="go(\'dt\',this.dataset.id)">';
+      html+='<td><code>'+x.id+'</code></td>';
+      html+='<td style="font-size:11px;white-space:nowrap">'+x.dt+'</td>';
+      html+='<td style="font-weight:500">'+x.by+'</td>';
+      html+='<td style="font-size:11px">'+(xsv.m||'—')+'</td>';
+      html+='<td style="font-size:11px">'+(xsv.pl||'—')+'</td>';
+      html+='<td style="font-size:11px;color:#e8431e;font-weight:600">R$ '+(xsv.pr||'—')+'</td>';
+      html+='<td style="font-size:11px;color:var(--tx2)">'+(xvnd.n?xvnd.n.split(' ')[0]:'—')+'</td>';
+      html+='<td>'+sbdg(x.st)+'</td>';
+      html+='</tr>';
     }
-    html+='</tbody></table>';
+    html+='</tbody></table></div>';
   }
   html+='</div>';
 
-  // Origens - TODAS
+
+  // Filtro de período para rankings
+  var dbP=G.dbPeriod||'mes';
+  var nowD=new Date();
+  var mesP=('0'+(nowD.getMonth()+1)).slice(-2);
+  var anoP=String(nowD.getFullYear());
+  var anoP2=anoP.slice(-2);
+  // Início da semana (segunda-feira)
+  var diaSem=nowD.getDay()===0?6:nowD.getDay()-1;
+  var segD=new Date(nowD); segD.setDate(nowD.getDate()-diaSem); segD.setHours(0,0,0,0);
+
+  function parseDt(dt){
+    if(!dt) return null;
+    var p=dt.split('/');
+    if(p.length<3) return null;
+    var y=p[2].length===2?'20'+p[2]:p[2];
+    return new Date(parseInt(y),parseInt(p[1])-1,parseInt(p[0]));
+  }
+
+  function filterPeriod(arr){
+    if(dbP==='semana') return arr.filter(function(t){var d=parseDt(t.dt);return d&&d>=segD&&d<=nowD;});
+    if(dbP==='mes') return arr.filter(function(t){var d=parseDt(t.dt);return d&&('0'+(d.getMonth()+1)).slice(-2)===mesP&&String(d.getFullYear())===anoP;});
+    return arr; // 'todos'
+  }
+
+  var Tperiod=filterPeriod(T);
+
+  // Tabs período
+  html+='<div style="display:flex;gap:6px;margin-bottom:12px">';
+  [{v:'semana',l:'Esta Semana'},{v:'mes',l:'Este Mês'},{v:'todos',l:'Todos'}].forEach(function(opt){
+    var active=dbP===opt.v;
+    html+='<button class="btn bsm" style="'+(active?'background:var(--red);color:#fff;':'background:var(--bg3);color:var(--tx2);')+'" onclick="G.dbPeriod=\''+opt.v+'\';re()">'+opt.l+'</button>';
+  });
+  html+='</div>';
+
+  // Origens
   var ogMap={};
-  T.forEach(function(x){ogMap[x.og]=(ogMap[x.og]||0)+1;});
+  Tperiod.forEach(function(x){ogMap[x.og]=(ogMap[x.og]||0)+1;});
   var ogArr=Object.keys(ogMap).map(function(k){return{k:k,v:ogMap[k]};}).sort(function(a,b){return b.v-a.v;});
   html+='<div class="card"><div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:14px">Top Origens</div>';
-  if(ogArr.length===0){ html+='<div style="text-align:center;padding:20px;color:var(--tx3);font-size:12px">Sem dados</div>'; }
+  if(ogArr.length===0){ html+='<div style="text-align:center;padding:20px;color:var(--tx3);font-size:12px">Sem dados no período</div>'; }
   else { var ogMax=ogArr[0].v; ogArr.forEach(function(o){ html+='<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="font-weight:500">'+o.k+'</span><span style="font-weight:700;color:var(--red)">'+o.v+'</span></div>'+bar(o.v,ogMax,'var(--red)')+'</div>'; }); }
   html+='</div>';
 
-  // Vendedores - TODOS
+  // Vendedores
   var selMap={};
-  T.forEach(function(x){var u=G.U.find(function(u){return u.id===x.cr;}); var nm=u?u.n.split(' ')[0]:('ID '+x.cr); selMap[nm]=(selMap[nm]||0)+1;});
+  Tperiod.forEach(function(x){var u=G.U.find(function(u){return u.id===x.cr;}); var nm=u?u.n.split(' ')[0]:('ID '+x.cr); selMap[nm]=(selMap[nm]||0)+1;});
   var selArr=Object.keys(selMap).map(function(k){return{k:k,v:selMap[k]};}).sort(function(a,b){return b.v-a.v;});
   html+='<div class="card"><div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:14px">Por Vendedor</div>';
-  if(selArr.length===0){ html+='<div style="text-align:center;padding:20px;color:var(--tx3);font-size:12px">Sem dados</div>'; }
+  if(selArr.length===0){ html+='<div style="text-align:center;padding:20px;color:var(--tx3);font-size:12px">Sem dados no período</div>'; }
   else { var selMax=selArr[0].v; selArr.forEach(function(s){ html+='<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="font-weight:500">'+s.k+'</span><span style="font-weight:700;color:#1e4d8c">'+s.v+'</span></div>'+bar(s.v,selMax,'#1e4d8c')+'</div>'; }); }
   html+='</div>';
   html+='</div>';
@@ -560,6 +695,43 @@ function bDB(){
   html+='</div>';
   html+='</div>';
 
+  // ── Row 4: Ranking de Veículos ──
+  var vehMap={};
+  T.forEach(function(t){
+    (t.sv||[]).forEach(function(v){
+      // Usa marca + primeiro nome do modelo (ignora versão)
+      var marca='';
+      var modelo='';
+      if(v.mk&&v.mo){
+        marca=v.mk.trim();
+        modelo=v.mo.trim().split(' ')[0]; // só primeira palavra do modelo
+      } else if(v.m){
+        var parts=v.m.split('/');
+        marca=parts[0].trim();
+        modelo=parts[1]?parts[1].trim().split(' ')[0]:'';
+      }
+      var key=marca+(modelo?' / '+modelo:'');
+      if(key) vehMap[key]=(vehMap[key]||0)+1;
+    });
+  });
+  var vehArr=Object.keys(vehMap).map(function(k){return{k:k,v:vehMap[k]};}).sort(function(a,b){return b.v-a.v;});
+  html+='<div class="card" style="margin-bottom:18px">';
+  html+='<div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:14px">🏆 Ranking de Veículos Mais Vendidos</div>';
+  if(vehArr.length===0){
+    html+='<div style="text-align:center;padding:20px;color:var(--tx3);font-size:12px">Sem dados</div>';
+  } else {
+    html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px">';
+    vehArr.forEach(function(v,idx){
+      html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg3);border-radius:6px">';
+      html+='<div style="font-size:16px;font-weight:800;color:'+(idx===0?'#e8431e':idx===1?'#1e4d8c':idx===2?'#1a6b3c':'var(--tx3)')+';min-width:24px;text-align:center">'+(idx+1)+'º</div>';
+      html+='<div style="flex:1"><div style="font-size:12px;font-weight:600">'+v.k+'</div></div>';
+      html+='<div style="font-size:13px;font-weight:700;color:var(--red)">'+v.v+'</div>';
+      html+='</div>';
+    });
+    html+='</div>';
+  }
+  html+='</div>';
+
   return html;
 }
 
@@ -591,7 +763,7 @@ function bTL(){
       var t=fl[i];
       html+='<tr class="cr" data-id="'+t.id+'" onclick="go(\'dt\',this.dataset.id)"><td><code>'+t.id+'</code></td><td style="color:var(--tx3);font-size:12px">'+t.dt+'</td><td style="font-weight:500">'+t.by+'</td><td style="font-size:12px">'+t.sv.map(function(v){return v.m;}).join(', ')+'</td><td style="font-size:12px;color:var(--tx3)">'+t.og+'</td><td>'+sbdg(t.st)+'</td><td onclick="event.stopPropagation()">';
       if(cA()&&t.st==='pending') html+='<button class="btn bok bsm" data-id="'+t.id+'" onclick="G.mo=this.dataset.id;re()">✓ Aprovar</button> ';
-      if(!t.locked&&(t.cr===G.u.id||G.u.r==='admin')) html+='<button class="btn bs bsm" data-id="'+t.id+'" onclick="startEdit(this.dataset.id)">✏ Editar</button>';
+      if(!t.locked&&(t.cr===G.u.id||G.u.r==='admin'||G.u.r==='master'||G.u.r==='manager')) html+='<button class="btn bs bsm" data-id="'+t.id+'" onclick="startEdit(this.dataset.id)">✏ Editar</button>';
       html+='</td></tr>';
     }
     html+='</tbody></table></div>';
@@ -610,7 +782,7 @@ function mFld(label, path, val, req){
 function bDT(){
   var t=G.T.find(function(x){return x.id===G.sid;});
   if(!t) return '<div style="text-align:center;padding:40px;color:var(--tx3)">Termo não encontrado</div>';
-  var cr=G.U.find(function(u){return u.id===t.cr;});
+  var cr=G.U.find(function(u){return u.id===t.cr;})||{n:(t.lg&&t.lg[0]?t.lg[0].u:'—')};
   var html='<div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap">';
   html+='<button class="btn bg bsm" onclick="go(\'tl\')">← Voltar</button>';
   html+='<h2 style="font-family:var(--s);font-size:21px;flex:1">Termo — '+t.id+'</h2>';
@@ -618,9 +790,9 @@ function bDT(){
   if(t.locked) html+=' <span style="font-size:11px;color:var(--tx3);background:var(--bg3);padding:4px 9px;border-radius:6px">🔒 Aprovado — bloqueado</span>';
   html+=' <button class="btn bp bsm" data-id="'+t.id+'" onclick="gerarPDF(this.dataset.id)">⬇ Salvar PDF</button>';
   html+=' <button class="btn bs bsm" data-id="'+t.id+'" onclick="G.pid=this.dataset.id;re()">👁 Visualizar</button>';
-  if(!t.locked&&(t.cr===G.u.id||G.u.r==='admin')) html+=' <button class="btn bs bsm" data-id="'+t.id+'" onclick="startEdit(this.dataset.id)">✏ Editar</button>';
+  if(!t.locked&&(t.cr===G.u.id||G.u.r==='admin'||G.u.r==='master'||G.u.r==='manager')) html+=' <button class="btn bs bsm" data-id="'+t.id+'" onclick="startEdit(this.dataset.id)">✏ Editar</button>';
   if(cA()&&t.st==='pending') html+=' <button class="btn bok bsm" data-id="'+t.id+'" onclick="G.mo=this.dataset.id;re()">✓ Aprovar / Recusar</button>';
-  if(cM()) html+=' <button class="btn" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;font-size:12px;padding:5px 11px;border-radius:6px" data-id="'+t.id+'" onclick="if(confirm(\'Excluir este termo permanentemente?\')){{var idx=G.T.findIndex(function(x){return x.id===this.dataset.id;}.bind(this));if(idx>-1){G.T.splice(idx,1);saveData();go(\'tl\');}}}" >🗑 Excluir</button>';
+  if(cM()) html+=' <button class="btn" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;font-size:12px;padding:5px 11px;border-radius:6px" data-id="'+t.id+'" onclick="if(confirm(\'Excluir este termo permanentemente?\')){{var idx=G.T.findIndex(function(x){return x.id===this.dataset.id;}.bind(this));if(idx>-1){var delId=G.T[idx].id;G.T.splice(idx,1);if(G.DEL.indexOf(delId)===-1)G.DEL.push(delId);saveData();go(\'tl\');}}}" >🗑 Excluir</button>';
   html+='</div>';
   html+='<div style="display:grid;grid-template-columns:2fr 1fr;gap:18px"><div>';
   html+='<div class="card" style="margin-bottom:16px">';
@@ -685,7 +857,7 @@ function bDT(){
 
 function startEdit(id){
   var t=G.T.find(function(x){return x.id===id;});
-  if(!t||t.locked){alert('Este termo foi aprovado e não pode ser editado.');return;}
+  if(!t){alert('Termo não encontrado.');return;} if(t.locked&&G.u.r!=='master'&&G.u.r!=='manager'){alert('Este termo foi aprovado e não pode ser editado.');return;}
   G.nf=JSON.parse(JSON.stringify(t));
   G.nf.editMode=true; G.nf.editId=id; G.nf.dn=false;
   G.ns=0; go('nv');
@@ -732,25 +904,40 @@ function bNV(){
 }
 
 function iNF(){
-  G.nf={dt:td(),og:'',by:'',ph:'',ph2:'',city:'',tp:'VENDA FINAL',sv:[eSV()],tv:[],py:{formas:[],obs:'',vo:'',hf:false,fb:'',fv:'',fp:'',fpv:'',ft:'',fvc:''},dn:false,did:'',editMode:false,editId:null};
+  G.nf={dt:td(),og:'',by:'',ph:'',ph2:'',city:'',state:'',dlv:'',tp:'VENDA FINAL',sv:[eSV()],tv:[],py:{formas:[],obs:'',vo:'',hf:false,fb:'',fv:'',fp:'',fpv:'',ft:'',fvc:''},dn:false,did:'',editMode:false,editId:null};
   G.ns=0;
 }
 
 function bS0(f){
   var html='<div style="font-family:var(--s);font-size:19px;margin-bottom:16px">Informações Gerais</div><div class="g2">';
   var dtVal=f.dt?(f.dt.includes('/')?f.dt.split('/').reverse().join('-'):f.dt):(function(){var n=new Date();return n.getFullYear()+'-'+(('0'+(n.getMonth()+1)).slice(-2))+'-'+(('0'+n.getDate()).slice(-2));})();
-  html+='<div class="fl"><label>Data</label><input type="date" value="'+dtVal+'" onchange="if(G.nf){var p=this.value.split(\'-\');G.nf.dt=p[2]+\'/\'+p[1]+\'/\'+p[0];}" class="notransform" style="text-transform:none"></div>';
-  html+='<div class="fl"><label>Origem <span class="req">*</span></label><select onchange="if(G.nf)G.nf.og=this.value" class="'+(f.og?'':'er')+'"><option value="">Selecione a origem...</option>';
+  var dlvVal=f.dlv?(f.dlv.includes('/')?f.dlv.split('/').reverse().join('-'):f.dlv):'';
+  // 1. Data (obrigatório)
+  html+='<div class="fl"><label>Data <span class="req">*</span></label><input type="date" value="'+dtVal+'" onchange="if(G.nf){var p=this.value.split(\'-\');G.nf.dt=p[2]+\'/\'+p[1]+\'/\'+p[0];}" class="notransform '+(f.dt?'':'er')+'" style="text-transform:none"></div>';
+  // 2. Origem (obrigatório)
+  html+='<div class="fl"><label>Origem <span class="req">*</span></label><select onchange="if(G.nf)G.nf.og=this.value" class="'+(f.og?'':'er')+'"><option value="">Selecione...</option>';
   for(var i=0;i<ORIGENS.length;i++) html+='<option value="'+ORIGENS[i]+'"'+(f.og===ORIGENS[i]?' selected':'')+'>'+ORIGENS[i]+'</option>';
   html+='</select></div>';
-  html+='<div class="fl full"><label>Nome do Comprador <span class="req">*</span></label><input value="'+f.by+'" oninput="if(G.nf)G.nf.by=this.value.toUpperCase()" placeholder="Nome completo" class="'+(f.by.trim()?'':'er')+'"></div>';
-  html+='<div class="fl"><label>Telefone <span class="req">*</span></label><input value="'+f.ph+'" oninput="if(G.nf){G.nf.ph=this.value;var d=this.value.replace(/\\D/g,\'\');if(d.length===11)this.value=\'(\'+d.slice(0,2)+\') \'+d.slice(2,7)+\'-\'+d.slice(7);else if(d.length===10)this.value=\'(\'+d.slice(0,2)+\') \'+d.slice(2,6)+\'-\'+d.slice(6);}" placeholder="(47) 9XXXX-XXXX" class="notransform '+(f.ph.trim()?'':'er')+'" style="text-transform:none"></div>';
-  html+='<div class="fl"><label>Tipo de Venda</label><select onchange="if(G.nf)G.nf.tp=this.value" class="notransform" style="text-transform:none">';
+  // 3. Nome (obrigatório) - full width
+  html+='<div class="fl full"><label>Nome do Comprador <span class="req">*</span></label><input value="'+f.by+'" oninput="if(G.nf)G.nf.by=this.value.toUpperCase()" class="'+(f.by.trim()?'':'er')+'"></div>';
+  // 4. Telefone 1 (obrigatório)
+  html+='<div class="fl"><label>Telefone 1 <span class="req">*</span></label><input value="'+f.ph+'" oninput="if(G.nf){G.nf.ph=this.value;var d=this.value.replace(/\\D/g,\'\');if(d.length===11)this.value=\'(\'+d.slice(0,2)+\') \'+d.slice(2,7)+\'-\'+d.slice(7);else if(d.length===10)this.value=\'(\'+d.slice(0,2)+\') \'+d.slice(2,6)+\'-\'+d.slice(6);}" class="notransform '+(f.ph.trim()?'':'er')+'" style="text-transform:none"></div>';
+  // 5. Telefone 2 (opcional)
+  html+='<div class="fl"><label>Telefone 2 (opcional)</label><input value="'+(f.ph2||'')+'" oninput="if(G.nf){G.nf.ph2=this.value;var d=this.value.replace(/\\D/g,\'\');if(d.length===11)this.value=\'(\'+d.slice(0,2)+\') \'+d.slice(2,7)+\'-\'+d.slice(7);else if(d.length===10)this.value=\'(\'+d.slice(0,2)+\') \'+d.slice(2,6)+\'-\'+d.slice(6);}" class="notransform" style="text-transform:none"></div>';
+  // 6. Tipo de Venda (obrigatório)
+  html+='<div class="fl"><label>Tipo de Venda <span class="req">*</span></label><select onchange="if(G.nf)G.nf.tp=this.value" class="notransform '+(f.tp?'':'er')+'" style="text-transform:none"><option value="">Selecione...</option>';
   var TPVENDAS=['VENDA FINAL','VENDA REPASSE','VENDA SEM GARANTIA'];
   for(var tv=0;tv<TPVENDAS.length;tv++) html+='<option value="'+TPVENDAS[tv]+'"'+(f.tp===TPVENDAS[tv]?' selected':'')+'>'+TPVENDAS[tv]+'</option>';
   html+='</select></div>';
-  html+='<div class="fl"><label>Telefone 2 (opcional)</label><input value="'+(f.ph2||'')+'" oninput="if(G.nf){G.nf.ph2=this.value;var d=this.value.replace(/\\D/g,\'\');if(d.length===11)this.value=\'(\'+d.slice(0,2)+\') \'+d.slice(2,7)+\'-\'+d.slice(7);else if(d.length===10)this.value=\'(\'+d.slice(0,2)+\') \'+d.slice(2,6)+\'-\'+d.slice(6);}" placeholder="(47) 9XXXX-XXXX" class="notransform" style="text-transform:none"></div>';
-  html+='<div class="fl"><label>Cidade do Cliente</label><input value="'+(f.city||'')+'" oninput="if(G.nf)G.nf.city=this.value.toUpperCase()" placeholder="BRUSQUE - SC"></div>';
+  // 7. Cidade (obrigatório)
+  html+='<div class="fl"><label>Cidade <span class="req">*</span></label><input value="'+(f.city||'')+'" oninput="if(G.nf)G.nf.city=this.value.toUpperCase()" class="'+(f.city?'':'er')+'"></div>';
+  // 8. Estado (obrigatório)
+  html+='<div class="fl"><label>Estado <span class="req">*</span></label><select onchange="if(G.nf)G.nf.state=this.value" class="notransform '+(f.state?'':'er')+'" style="text-transform:none"><option value="">UF...</option>';
+  var UFS=['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
+  for(var uf=0;uf<UFS.length;uf++) html+='<option value="'+UFS[uf]+'"'+(f.state===UFS[uf]?' selected':'')+'>'+UFS[uf]+'</option>';
+  html+='</select></div>';
+  // 9. Data de Entrega Combinada
+  html+='<div class="fl"><label>Data de Entrega Combinada</label><input type="date" value="'+dlvVal+'" onchange="if(G.nf){var p=this.value.split(\'-\');G.nf.dlv=p[2]+\'/\'+p[1]+\'/\'+p[0];}" class="notransform" style="text-transform:none"></div>';
   html+='</div>';
   return html;
 }
@@ -810,46 +997,53 @@ function bS2(f){
 function bS3(f){
   var p=f.py;
   var html='<div style="font-family:var(--s);font-size:19px;margin-bottom:16px">Formas de Pagamento</div>';
-  // Cálculo automático: Venda - Entrada + Quitação
+  // Cálculo automático
   var _venda=(f.sv||[]).reduce(function(s,v){return s+fmtM(v.pr);},0);
   var _entr =(f.tv||[]).reduce(function(s,v){return s+fmtM(v.v); },0);
   var _quit =(f.tv||[]).reduce(function(s,v){return s+fmtM(v.bk);},0);
   var _calc =_venda-_entr+_quit;
-  // Auto-fill vo if empty or user hasn't overridden
-  if(!p.vo||p.vo==='') { if(G.nf) G.nf.py.vo=((_calc>0)?fmtBRL(_calc):'0,00'); p.vo=G.nf.py.vo; }
+  // Sempre atualiza o vo com o cálculo mais recente
+  if(G.nf){ G.nf.py.vo=fmtBRL(_calc>0?_calc:0); p.vo=G.nf.py.vo; }
+  // Painel cálculo
   html+='<div class="card" style="background:var(--bg3);border:1px solid var(--bdr);padding:14px 16px;margin-bottom:14px">';
-  html+='<div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Cálculo do Valor a Cobrar</div>';
-  html+='<div style="display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;align-items:center;gap:6px;font-size:13px">';
-  html+='<div style="text-align:center"><div style="font-size:10px;color:var(--tx3);margin-bottom:3px">VALOR DE VENDA</div><div style="font-weight:700;color:#1e4d8c">R$ '+fmtBRL(_venda)+'</div></div>';
-  html+='<div style="text-align:center;font-size:18px;color:var(--tx3)">−</div>';
-  html+='<div style="text-align:center"><div style="font-size:10px;color:var(--tx3);margin-bottom:3px">VALOR DE ENTRADA</div><div style="font-weight:700;color:#e8431e">R$ '+fmtBRL(_entr)+'</div></div>';
-  html+='<div style="text-align:center;font-size:18px;color:var(--tx3)">+</div>';
-  html+='<div style="text-align:center"><div style="font-size:10px;color:var(--tx3);margin-bottom:3px">VALOR QUITAÇÃO</div><div style="font-weight:700;color:#b8860b">R$ '+fmtBRL(_quit)+'</div></div>';
-  html+='<div style="text-align:center;font-size:18px;color:var(--tx3)">=</div>';
-  html+='<div style="text-align:center;background:#fff;border-radius:6px;padding:6px 8px;border:2px solid #1a6b3c"><div style="font-size:10px;color:var(--tx3);margin-bottom:3px">VALOR A COBRAR</div><div style="font-weight:700;font-size:16px;color:#1a6b3c">R$ '+fmtBRL(_calc)+'</div></div>';
+  html+='<div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:10px">Cálculo do Valor a Cobrar</div>';
+  html+='<div style="display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;align-items:center;gap:6px">';
+  html+='<div style="text-align:center"><div style="font-size:9px;color:var(--tx3);margin-bottom:3px">VALOR DE VENDA</div><div style="font-weight:700;color:#1e4d8c;font-size:13px">R$ '+fmtBRL(_venda)+'</div></div>';
+  html+='<div style="text-align:center;font-size:16px;color:var(--tx3)">−</div>';
+  html+='<div style="text-align:center"><div style="font-size:9px;color:var(--tx3);margin-bottom:3px">VALOR ENTRADA</div><div style="font-weight:700;color:#e8431e;font-size:13px">R$ '+fmtBRL(_entr)+'</div></div>';
+  html+='<div style="text-align:center;font-size:16px;color:var(--tx3)">+</div>';
+  html+='<div style="text-align:center"><div style="font-size:9px;color:var(--tx3);margin-bottom:3px">QUITAÇÃO</div><div style="font-weight:700;color:#b8860b;font-size:13px">R$ '+fmtBRL(_quit)+'</div></div>';
+  html+='<div style="text-align:center;font-size:16px;color:var(--tx3)">=</div>';
+  html+='<div style="text-align:center;background:#fff;border-radius:6px;padding:6px 8px;border:2px solid #1a6b3c"><div style="font-size:9px;color:var(--tx3);margin-bottom:3px">VALOR A COBRAR</div><div style="font-weight:700;font-size:15px;color:#1a6b3c">R$ '+fmtBRL(_calc)+'</div></div>';
   html+='</div></div>';
+  // Valor da Volta
   html+=mFld('Valor da Volta / Pagamento','nf.py.vo',p.vo,false);
+  // Formas utilizadas
   html+='<div class="fl" style="margin-bottom:14px;margin-top:14px"><label>Formas utilizadas</label><div class="rg">';
   for(var i=0;i<FORMAS.length;i++){
     var fp=FORMAS[i], checked=(p.formas||[]).indexOf(fp)>-1;
     html+='<label class="ro" style="background:'+(checked?'var(--redl)':'var(--bg3)')+';border:1px solid '+(checked?'var(--red)':'var(--bdr)')+';border-radius:7px;padding:6px 11px;font-size:12px;font-weight:500;cursor:pointer"><input type="checkbox" data-forma="'+fp+'" '+(checked?'checked':'')+' onchange="toggleForma(this.dataset.forma)" style="accent-color:var(--red)"> '+fp+'</label>';
   }
   html+='</div></div>';
-  html+='<label style="display:flex;align-items:center;gap:9px;padding:10px 13px;background:var(--bg3);border-radius:var(--r);cursor:pointer;font-size:13px;font-weight:500;margin:14px 0"><input type="checkbox" '+(p.hf?'checked':'')+' onchange="if(G.nf)G.nf.py.hf=this.checked;re()" style="accent-color:var(--red);width:15px;height:15px"> Detalhar financiamento</label>';
-  html+='<div class="fl" style="margin-bottom:14px"><label>Descreva a negociação / condições de pagamento <span class="req">*</span></label>';
-  html+='<textarea oninput="if(G.nf)G.nf.py.obs=this.value.toUpperCase()" placeholder="EX: ENTRADA R$ 30.000 DINHEIRO + FINANCIAMENTO BRADESCO 48X..." style="min-height:80px">'+p.obs+'</textarea></div>';
-  html+='<div class="fl" style="margin-bottom:14px;margin-top:12px"><label>Observações adicionais</label>';
-  html+='<textarea oninput="if(G.nf)G.nf.py.obs2=this.value.toUpperCase()" placeholder="EX: CHAVE RESERVA ENTREGUE, REVISÃO AGENDADA..." style="min-height:64px">'+(p.obs2||'')+'</textarea></div>';
+  // Detalhar financiamento
+  html+='<label style="display:flex;align-items:center;gap:9px;padding:10px 13px;background:var(--bg3);border-radius:var(--r);cursor:pointer;font-size:13px;font-weight:500;margin:0 0 14px"><input type="checkbox" '+(p.hf?'checked':'')+' onchange="if(G.nf)G.nf.py.hf=this.checked;re()" style="accent-color:var(--red);width:15px;height:15px"> Detalhar financiamento</label>';
+  // Campos financiamento (se marcado) - ANTES da negociação
   if(p.hf){
-    html+='<div class="g2">';
-    html+='<div class="fl"><label>Banco</label><input value="'+p.fb+'" oninput="if(G.nf)G.nf.py.fb=this.value.toUpperCase()" placeholder="BRADESCO, ITAÚ..."></div>';
+    html+='<div class="g2" style="margin-bottom:14px">';
+    html+='<div class="fl"><label>Banco</label><input value="'+p.fb+'" oninput="if(G.nf)G.nf.py.fb=this.value.toUpperCase()"></div>';
     html+=mFld('Valor Financiado','nf.py.fv',p.fv,false);
-    html+='<div class="fl"><label>Nº de Parcelas</label><input value="'+p.fp+'" oninput="if(G.nf)G.nf.py.fp=this.value" placeholder="48" class="notransform" style="text-transform:none"></div>';
+    html+='<div class="fl"><label>Nº de Parcelas</label><input value="'+p.fp+'" oninput="if(G.nf)G.nf.py.fp=this.value" class="notransform" style="text-transform:none"></div>';
     html+=mFld('Valor da Parcela','nf.py.fpv',p.fpv,false);
-    html+='<div class="fl"><label>Tabela</label><input value="'+p.ft+'" oninput="if(G.nf)G.nf.py.ft=this.value" placeholder="1,2%" class="notransform" style="text-transform:none"></div>';
-    html+='<div class="fl"><label>Vencimento 1ª Parcela</label><input value="'+p.fvc+'" data-path="nf.py.fvc" oninput="onDate(this,this.dataset.path)" onchange="onDate(this,this.dataset.path)" placeholder="dd/mm/aaaa" class="notransform" style="text-transform:none" maxlength="10" inputmode="numeric"></div>';
+    html+='<div class="fl"><label>Tabela</label><input value="'+p.ft+'" oninput="if(G.nf)G.nf.py.ft=this.value" class="notransform" style="text-transform:none"></div>';
+    html+='<div class="fl"><label>Vencimento 1ª Parcela</label><input value="'+p.fvc+'" data-path="nf.py.fvc" oninput="onDate(this,this.dataset.path)" onchange="onDate(this,this.dataset.path)" class="notransform" style="text-transform:none" maxlength="10" inputmode="numeric"></div>';
     html+='</div>';
   }
+  // Negociação - DEPOIS do financiamento
+  html+='<div class="fl" style="margin-bottom:14px"><label>Descreva a negociação / condições de pagamento <span class="req">*</span></label>';
+  html+='<textarea oninput="if(G.nf)G.nf.py.obs=this.value.toUpperCase()" style="min-height:80px">'+p.obs+'</textarea></div>';
+  // Observações adicionais
+  html+='<div class="fl" style="margin-bottom:14px"><label>Observações adicionais</label>';
+  html+='<textarea oninput="if(G.nf)G.nf.py.obs2=this.value.toUpperCase()" style="min-height:64px">'+(p.obs2||'')+'</textarea></div>';
   html+='<div class="al aw" style="margin-top:14px;margin-bottom:0"><span>ℹ</span><div>Este Termo será enviado para <strong>Rafael Gonçalves</strong> aprovar.</div></div>';
   return html;
 }
@@ -864,9 +1058,13 @@ function toggleForma(f){
 function nS(){
   var f=G.nf, s=G.ns;
   if(s===0){
+    if(!f.dt) return alert('Informe a Data.');
     if(!f.og) return alert('Selecione a Origem.');
     if(!f.by.trim()) return alert('Informe o nome do comprador.');
-    if(!f.ph.trim()) return alert('Informe o telefone.');
+    if(!f.ph.trim()) return alert('Informe o Telefone 1.');
+    if(!f.tp) return alert('Selecione o Tipo de Venda.');
+    if(!f.city||!f.city.trim()) return alert('Informe a Cidade.');
+    if(!f.state) return alert('Selecione o Estado.');
   }
   if(s===1){
     for(var i=0;i<f.sv.length;i++){
@@ -971,7 +1169,7 @@ function bNP(){
 function bPDFv(){
   var t=G.T.find(function(x){return x.id===G.pid;});
   if(!t) return '';
-  var cr=G.U.find(function(u){return u.id===t.cr;});
+  var cr=G.U.find(function(u){return u.id===t.cr;})||{n:(t.lg&&t.lg[0]?t.lg[0].u:'—')};
   var html='<div class="pov" onclick="if(event.target===this){G.pid=null;re();}"><div class="pfr">';
   html+='<div style="background:#f0f0f0;border-bottom:1px solid #ddd;padding:12px 22px;display:flex;align-items:center;justify-content:space-between"><span style="color:#333;font-weight:600;font-size:14px">Pré-visualização — '+t.id+'</span><div style="display:flex;gap:8px"><button class="btn bp bsm" data-id="'+t.id+'" onclick="gerarPDF(this.dataset.id)">⬇ Salvar PDF</button><button class="btn bs bsm" onclick="G.pid=null;re()">× Fechar</button></div></div>';
   html+='<div style="background:#e8431e;padding:18px 26px;display:flex;justify-content:space-between;align-items:center"><img src="'+LOGO+'" style="max-height:48px;width:auto;object-fit:contain;border-radius:6px"><div style="text-align:right"><div style="font-size:11px;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:2px">Termo de Venda</div><div style="font-size:10px;color:rgba(255,255,255,.85);margin-top:2px">'+(t.tp||'VENDA FINAL')+'</div><div style="font-size:18px;font-weight:700;color:#fff;font-family:var(--s)">'+t.id+'</div><div style="font-size:11px;color:rgba(255,255,255,.8);margin-top:3px">Data: '+t.dt+' | Origem: '+t.og+'</div></div></div>';
@@ -1034,7 +1232,7 @@ function bPDFv(){
 function gerarPDF(id){
   var t=G.T.find(function(x){return x.id===id;});
   if(!t){alert('Termo não encontrado');return;}
-  var cr=G.U.find(function(u){return u.id===t.cr;});
+  var cr=G.U.find(function(u){return u.id===t.cr;})||{n:(t.lg&&t.lg[0]?t.lg[0].u:'—')};
   var jsPDF=window.jspdf.jsPDF;
   var doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true,putOnlyUsedFonts:true});
   var W=210,M=11,y=0;
@@ -1050,13 +1248,13 @@ function gerarPDF(id){
   function secao(titulo,cor){fr(M,y,W-M*2,7,'#e8e8e8');sf('bold',8,'#444444');doc.text(titulo,W/2,y+5,{align:'center'});y+=8;}
   // Header
   fr(0,0,W,28,'#e0e0e0');
-  try{doc.addImage(LOGO,'PNG',M,3,0,22);}catch(e){}
-  sf('bold',20,'#333333');doc.text('TERMO DE VENDA',W/2,10,{align:'center'});sf('bold',9,'#333333');doc.text(t.tp||'VENDA FINAL',W/2,16,{align:'center'});
-  sf('normal',9,'#666666');doc.text('Data: '+fmtDt(t.dt),W-M,8,{align:'right'});doc.text('Origem: '+t.og,W-M,14,{align:'right'});
+  try{doc.addImage(LOGO,'PNG',M,4,30,20);}catch(e){}
+  sf('bold',18,'#333333');doc.text('TERMO DE VENDA',W/2+15,11,{align:'center'});sf('bold',8,'#333333');doc.text(t.tp||'VENDA FINAL',W/2+15,17,{align:'center'});
+  sf('normal',8,'#666666');doc.text('Data: '+fmtDt(t.dt),W-M,8,{align:'right'});doc.text('Origem: '+t.og,W-M,14,{align:'right'});
   y=34;
   var tw=W-M*2;
   secao('DADOS DO COMPRADOR','#1e4d8c');
-  y=2; y=lc([{l:'Comprador',v:t.by,x:M,w:tw/2-2},{l:'Telefone',v:fmtPh(t.ph),x:M+tw/2+2,w:tw/2-2}],y);y+=4;
+  y=lc([{l:'Comprador',v:t.by,x:M,w:tw/2-2},{l:'Telefone',v:fmtPh(t.ph),x:M+tw/2+2,w:tw/2-2}],y);y+=4;
   for(var i=0;i<t.sv.length;i++){
     var v=t.sv[i];
     secao('VEÍCULO VENDIDO'+(t.sv.length>1?' '+(i+1):''));
@@ -1085,6 +1283,14 @@ function gerarPDF(id){
     for(var ol=0;ol<obsLines.length;ol++){doc.text(obsLines[ol],M,y+4.5+(ol*5.5));}
     dl(M,y+5.5+(obsLines.length*5.5),M+tw,y+5.5+(obsLines.length*5.5),'#e0e0e0',0.15);
     y+=8+(obsLines.length*5.5);
+  }
+  if(t.py.obs2&&t.py.obs2.trim()){
+    sf('bold',7,'#888888');doc.text('INFORMAÇÕES ADICIONAIS',M,y);
+    sf('normal',9,'#1a1814');
+    var obs2Lines=doc.splitTextToSize(t.py.obs2,tw);
+    for(var o2=0;o2<obs2Lines.length;o2++){doc.text(obs2Lines[o2],M,y+4.5+(o2*5.5));}
+    dl(M,y+5.5+(obs2Lines.length*5.5),M+tw,y+5.5+(obs2Lines.length*5.5),'#e0e0e0',0.15);
+    y+=8+(obs2Lines.length*5.5);
   }
   if(t.py.hf){
     var w3=tw/3-2;
@@ -1154,7 +1360,40 @@ function aU(){
 
 function bPR(){
   var u=G.u;
-  return '<div style="max-width:400px"><h1 style="font-family:var(--s);font-size:22px;margin-bottom:20px">Meu Perfil</h1><div class="card"><div style="display:flex;align-items:center;gap:14px;margin-bottom:18px"><div class="av" style="background:'+(RC[u.r]||'#888')+';width:56px;height:56px;font-size:18px;border-radius:50%">'+ini(u.n)+'</div><div><div style="font-size:17px;font-weight:700">'+u.n+'</div><div style="font-size:12px;color:var(--tx3);margin-top:2px">'+u.e+'</div></div></div><div class="al ai">ℹ Para alterar senha ou e-mail, contate o administrador.</div></div></div>';
+  var html='<div style="max-width:400px">';
+  html+='<h1 style="font-family:var(--s);font-size:22px;margin-bottom:20px">Meu Perfil</h1>';
+  html+='<div class="card" style="margin-bottom:16px">';
+  html+='<div style="display:flex;align-items:center;gap:14px;margin-bottom:18px">';
+  html+='<div class="av" style="background:'+(RC[u.r]||'#888')+';width:56px;height:56px;font-size:18px;border-radius:50%">'+ini(u.n)+'</div>';
+  html+='<div><div style="font-size:17px;font-weight:700">'+u.n+'</div>';
+  html+='<div style="font-size:12px;color:var(--tx3);margin-top:2px">'+u.e+'</div>';
+  html+='<div style="margin-top:6px"><span class="bdg b'+(u.r==='master'?'mst':u.r==='admin'?'adm':u.r==='manager'?'man':'sel')+'">'+RL[u.r]+'</span></div>';
+  html+='</div></div></div>';
+  html+='<div class="card">';
+  html+='<div style="font-size:15px;font-weight:700;margin-bottom:14px">🔒 Alterar Senha</div>';
+  html+='<div class="fl"><label>Senha Atual</label><input type="password" id="pwOld" placeholder="Digite sua senha atual" class="notransform" style="text-transform:none"></div>';
+  html+='<div class="fl" style="margin-top:10px"><label>Nova Senha</label><input type="password" id="pwNew1" placeholder="Digite a nova senha (mín. 6 caracteres)" class="notransform" style="text-transform:none"></div>';
+  html+='<div class="fl" style="margin-top:10px"><label>Confirmar Nova Senha</label><input type="password" id="pwNew2" placeholder="Confirme a nova senha" class="notransform" style="text-transform:none"></div>';
+  html+='<button class="btn bp" style="margin-top:14px;width:100%;justify-content:center" onclick="alterarSenha()">Salvar nova senha</button>';
+  html+='</div></div>';
+  return html;
+}
+
+function alterarSenha(){
+  var o=document.getElementById('pwOld').value;
+  var n1=document.getElementById('pwNew1').value;
+  var n2=document.getElementById('pwNew2').value;
+  if(!o){ alert('Digite sua senha atual'); return; }
+  if(o!==G.u.p){ alert('Senha atual incorreta'); return; }
+  if(!n1||n1.length<6){ alert('Nova senha deve ter pelo menos 6 caracteres'); return; }
+  if(n1!==n2){ alert('As senhas não conferem'); return; }
+  var ui=G.U.findIndex(function(x){return x.id===G.u.id;});
+  G.U[ui].p=n1;
+  G.U[ui].firstLogin=false;
+  G.u=G.U[ui];
+  saveData();
+  alert('Senha alterada com sucesso!');
+  re();
 }
 
 function bi(){
@@ -1167,8 +1406,6 @@ function bi(){
   }
 }
 loadData();
-// Clear stale localStorage data - Sheets is the only source of truth
-try{ localStorage.clear(); }catch(e){}
 // Mostra tela de login imediatamente, depois carrega dados
 re();
 loadData();
